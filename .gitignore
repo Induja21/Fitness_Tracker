@@ -1,0 +1,7 @@
+# Ignore Library files History and Output folders
+Hardware/Library files/History/
+Hardware/Library files/Project Outputs for LPEDT_Component_Lib/
+
+# Ignore all History folders inside PCB_Project
+Hardware/PCB_Project/History/
+
