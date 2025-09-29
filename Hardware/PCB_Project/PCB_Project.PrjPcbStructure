@@ -1,1 +1,3 @@
 Record=TopLevelDocument|FileName=POWER.SchDoc|SheetNumber=1
+Record=NoMainPathDocument|SourceDocument=POWER.SchDoc|FileName=Power1.SchDoc|SheetNumber=2
+Record=NoMainPathDocument|SourceDocument=POWER.SchDoc|FileName=Sheet1.SchDoc|SheetNumber=2
