@@ -1,6 +1,7 @@
-Record=TopLevelDocument|FileName=COMMUNICATION.SchDoc|SheetNumber=2
-Record=NoMainPathDocument|SourceDocument=COMMUNICATION.SchDoc|FileName=EFR32BG13_INTERCONNECTS.SchDoc|SheetNumber=6
-Record=NoMainPathDocument|SourceDocument=COMMUNICATION.SchDoc|FileName=EFR32G13_POWER_RESET.SchDoc|SheetNumber=5
-Record=NoMainPathDocument|SourceDocument=COMMUNICATION.SchDoc|FileName=HEART_RATE.SchDoc|SheetNumber=3
-Record=NoMainPathDocument|SourceDocument=COMMUNICATION.SchDoc|FileName=LCD.SchDoc|SheetNumber=4
-Record=NoMainPathDocument|SourceDocument=COMMUNICATION.SchDoc|FileName=Power1.SchDoc|SheetNumber=1
+Record=TopLevelDocument|FileName=BLOCK DIAGRAM.SchDoc|SheetNumber=1
+Record=NoMainPathDocument|SourceDocument=BLOCK DIAGRAM.SchDoc|FileName=COMMUNICATION.SchDoc|SheetNumber=3
+Record=NoMainPathDocument|SourceDocument=BLOCK DIAGRAM.SchDoc|FileName=EFR32BG13_INTERCONNECTS.SchDoc|SheetNumber=7
+Record=NoMainPathDocument|SourceDocument=BLOCK DIAGRAM.SchDoc|FileName=EFR32G13_POWER_RESET.SchDoc|SheetNumber=6
+Record=NoMainPathDocument|SourceDocument=BLOCK DIAGRAM.SchDoc|FileName=HEART_RATE.SchDoc|SheetNumber=4
+Record=NoMainPathDocument|SourceDocument=BLOCK DIAGRAM.SchDoc|FileName=LCD.SchDoc|SheetNumber=5
+Record=NoMainPathDocument|SourceDocument=BLOCK DIAGRAM.SchDoc|FileName=POWER_BLOCK.SchDoc|SheetNumber=2
