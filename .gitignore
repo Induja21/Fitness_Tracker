@@ -4,4 +4,5 @@ Hardware/Library files/History/
 
 # Ignore all History folders inside PCB_Project
 Hardware/PCB_Project/History/
-"Hardware/PCB_Project/_Previews/"
+Hardware/PCB_Project/__Previews/
+
