@@ -1,0 +1,3 @@
+Added Component: Designator=ANT1(F_ANTENNA)
+Added Pin To Net: NetName=NetANT1_FEED Pin=ANT1-FEED
+Added Pin To Net: NetName=GND Pin=ANT1-GND

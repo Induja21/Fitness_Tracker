@@ -1,0 +1,5 @@
+Change Component Comment : Designator=Y2 Old Comment= New Comment=38.4MHz XTAL
+Change Net Name : Old Net Name=+1.8_VOUT New Net Name=+1V8_OUT
+Change Net Name : Old Net Name=+3.3_VOUT New Net Name=+3V3_OUT
+Added Rule: Name=Schematic Supply Nets
+Added Rule: Name=Schematic Supply Nets_6

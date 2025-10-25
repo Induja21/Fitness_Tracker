@@ -1,0 +1,14 @@
+Removed Pin From Net: NetName=MAX_RST Pin=U2-43
+Change Component Comment : Designator=J2 Old Comment=S2B-XH-A New Comment=B2B-XH-A(LF)(SN)
+Added Pin To Net: NetName=RESET Pin=R17-1
+Added Pin To Net: NetName=NetH2_3 Pin=R17-2
+Added Pin To Net: NetName=MAX_RST Pin=U2-4
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C4 CAP 0.1uF 0603
+Added Member To Class: ClassName=COMMUNICATION Member=Component R17 RES 0R 0603
+Add Class Member: Failed to add class member : Component TP1 Test Point
+Add Class Member: Failed to add class member : Component TP2 Test Point
+Add Class Member: Failed to add class member : Component TP3 Test Point
+Add Class Member: Failed to add class member : Component TP4 Test Point
+Add Class Member: Failed to add class member : Component TP13 Test Point
+Add Class Member: Failed to add class member : Component TP14 Test Point
+Add Class Member: Failed to add class member : Component TP15 Test Point

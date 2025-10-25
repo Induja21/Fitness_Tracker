@@ -1,0 +1,2 @@
+Removed Pin From Net: NetName=BMI_INT2 Pin=U2-19
+Added Pin To Net: NetName=BMI_INT2 Pin=U2-7

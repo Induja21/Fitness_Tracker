@@ -1,0 +1,3 @@
+Layer Pairs Export File for PCB: C:\Users\karth\OneDrive\Desktop\ESD_LAB\LPEDT_Project\Hardware\PCB_Project\SMART_WATCH.PcbDoc
+LayersSetName=Top_Bot_Thru_Holes|DrillFile=smart_watch-roundholes.txt|DrillLayers=gtl,gbl
+LayersSetName=Top_Bot_Slot_Holes|DrillFile=smart_watch-slotholes.txt|DrillLayers=gtl,gbl

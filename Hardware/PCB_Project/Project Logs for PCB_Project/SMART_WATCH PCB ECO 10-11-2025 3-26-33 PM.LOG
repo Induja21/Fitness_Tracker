@@ -1,0 +1,21 @@
+Added Pin To Net: NetName=RESET Pin=*1-1
+Added Pin To Net: NetName=RESET Pin=*1-2
+Added Pin To Net: NetName=Net*1_3 Pin=*1-3
+Added Pin To Net: NetName=Net*1_3 Pin=*1-4
+Added Pin To Net: NetName=RESET Pin=C4-1
+Added Pin To Net: NetName=GND Pin=C4-2
+Added Pin To Net: NetName=Net*1_3 Pin=R16-1
+Added Pin To Net: NetName=GND Pin=R16-2
+Added Pin To Net: NetName=RESET Pin=R17-1
+Added Pin To Net: NetName=NetH2_3 Pin=R17-2
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component *1
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C4 CAP 0.1uF 0603
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component R16
+Added Member To Class: ClassName=COMMUNICATION Member=Component R17 RES 0R 0603
+Add Class Member: Failed to add class member : Component TP1 Test Point
+Add Class Member: Failed to add class member : Component TP2 Test Point
+Add Class Member: Failed to add class member : Component TP3 Test Point
+Add Class Member: Failed to add class member : Component TP4 Test Point
+Add Class Member: Failed to add class member : Component TP13 Test Point
+Add Class Member: Failed to add class member : Component TP14 Test Point
+Add Class Member: Failed to add class member : Component TP15 Test Point

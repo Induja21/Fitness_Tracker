@@ -1,0 +1,29 @@
+Added Component: Designator=TP10(Test Point)
+Added Component: Designator=TP12(Test Point)
+Added Component: Designator=TP18(Test Point)
+Added Component: Designator=TP19(Test Point)
+Added Component: Designator=TP20(Test Point)
+Added Component: Designator=TP21(Test Point)
+Added Component: Designator=TP22(Test Point)
+Added Pin To Net: NetName=GND Pin=TP10-1
+Added Pin To Net: NetName=GND Pin=TP12-1
+Added Pin To Net: NetName=GND Pin=TP18-1
+Added Pin To Net: NetName=GND Pin=TP19-1
+Added Pin To Net: NetName=GND Pin=TP20-1
+Added Pin To Net: NetName=GND Pin=TP21-1
+Added Pin To Net: NetName=GND Pin=TP22-1
+Add Class Member: Failed to add class member : Component TP1 Test Point
+Add Class Member: Failed to add class member : Component TP2 Test Point
+Add Class Member: Failed to add class member : Component TP3 Test Point
+Add Class Member: Failed to add class member : Component TP4 Test Point
+Add Class Member: Failed to add class member : Component TP7 Test Point
+Added Member To Class: ClassName=LCD Member=Component TP10
+Added Member To Class: ClassName=LCD Member=Component TP12
+Add Class Member: Failed to add class member : Component TP13 Test Point
+Add Class Member: Failed to add class member : Component TP14 Test Point
+Add Class Member: Failed to add class member : Component TP15 Test Point
+Added Member To Class: ClassName=LCD Member=Component TP18
+Added Member To Class: ClassName=LCD Member=Component TP19
+Added Member To Class: ClassName=LCD Member=Component TP20
+Added Member To Class: ClassName=LCD Member=Component TP21
+Added Member To Class: ClassName=LCD Member=Component TP22

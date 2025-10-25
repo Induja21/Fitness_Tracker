@@ -1,0 +1,10 @@
+Removed Pin From Net: NetName=LCD_SCK Pin=TP18-1
+Removed Pin From Net: NetName=LCD_RST Pin=TP19-1
+Removed Pin From Net: NetName=LCD_RST Pin=TP20-1
+Removed Pin From Net: NetName=LCD_VCOM Pin=TP21-1
+Removed Pin From Net: NetName=LCD_SDI Pin=TP22-1
+Removed Member From Class: ClassName=LCD Member=TP18
+Removed Member From Class: ClassName=LCD Member=TP19
+Removed Member From Class: ClassName=LCD Member=TP20
+Removed Member From Class: ClassName=LCD Member=TP21
+Removed Member From Class: ClassName=LCD Member=TP22

@@ -1,0 +1,20 @@
+----------------------------------------------------------------------------------------------------------------------------------
+NCDrill File Report For: SMART_WATCH.PcbDoc   10/25/2025  12:58:31 PM
+----------------------------------------------------------------------------------------------------------------------------------
+
+Layer Pair : Top Layer to Bottom Layer
+ASCII RoundHoles File : SMART_WATCH-RoundHoles.TXT
+ASCII SlotHoles File : SMART_WATCH-SlotHoles.TXT
+
+Tool       Hole Size               Hole Tolerance               Hole Type       Hole Count   Plated         Tool Travel
+----------------------------------------------------------------------------------------------------------------------------------
+T1      0.2mm (8mil)                                              Round             21        PTH        47.93mm (1.89inch)
+T2      0.254mm (10mil)                                           Round             2         PTH        2.24mm (0.09inch)
+T3      0.305mm (12mil)                                           Round             91        PTH        394.28mm (15.52inch)
+T4      0.33mm (13mil)                                            Round             162       PTH        238.51mm (9.39inch)
+T5      0.6mm (24mil)                                             Slot              4         PTH        34.90mm (1.37inch)
+T6      1mm (39mil)                                               Round             2         PTH        2.50mm (0.10inch)
+----------------------------------------------------------------------------------------------------------------------------------
+Totals                                                                              282
+
+Total Processing Time (hh:mm:ss) : 00:00:00

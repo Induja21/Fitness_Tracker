@@ -1,0 +1,6 @@
+Change Component Designator: OldDesignator=5V NewDesignator=TP3
+Change Component Designator: OldDesignator=VIN NewDesignator=TP1
+Change Component Designator: OldDesignator=VSTOR NewDesignator=TP6
+Added Component: Designator=TP2(Test Point)
+Added Pin To Net: NetName=+3.3_VOUT Pin=TP2-1
+Added Member To Class: ClassName=POWER_BLOCK Member=Component TP2 Test Point

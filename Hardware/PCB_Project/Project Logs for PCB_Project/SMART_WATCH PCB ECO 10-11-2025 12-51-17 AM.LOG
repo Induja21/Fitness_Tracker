@@ -1,0 +1,130 @@
+Removed Pin From Net: NetName=S_SCL Pin=TP14-1
+Removed Pin From Net: NetName=S_SDA Pin=TP15-1
+Removed Pin From Net: NetName=MAX_RST Pin=TP16-1
+Removed Pin From Net: NetName=MAX_MFIO Pin=TP17-1
+Removed Pin From Net: NetName=LCD_SCK Pin=TP18-1
+Removed Pin From Net: NetName=LCD_CS Pin=TP19-1
+Removed Pin From Net: NetName=LCD_SDI Pin=TP20-1
+Removed Pin From Net: NetName=LCD_RST Pin=TP21-1
+Removed Pin From Net: NetName=S_SCL Pin=U7-2
+Removed Pin From Net: NetName=S_SDA Pin=U7-3
+Add component: Footprint Not Found SWITCH
+Add component: Footprint Not Found Capacitor 0603
+Add component: Footprint Not Found Capacitor 0603
+Add component: Footprint Not Found Capacitor 0603
+Add component: Footprint Not Found HRS_TF13BA-10S-0.4SH(800)
+Add component: Footprint Not Found RES_0603_1608X06
+Add component: Footprint Not Found RES_0603_1608X06
+Add component: Footprint Not Found XTAL 38.4MHz
+Add Pin To Net: Unknown Pin: Pin *1-1
+Add Pin To Net: Unknown Pin: Pin *1-2
+Add Pin To Net: Unknown Pin: Pin *1-3
+Add Pin To Net: Unknown Pin: Pin *1-4
+Add Pin To Net: Unknown Pin: Pin C15-1
+Add Pin To Net: Unknown Pin: Pin C15-2
+Add Pin To Net: Unknown Pin: Pin C16-1
+Add Pin To Net: Unknown Pin: Pin C16-2
+Add Pin To Net: Unknown Pin: Pin C18-1
+Add Pin To Net: Unknown Pin: Pin C18-2
+Add Pin To Net: Unknown Pin: Pin J3-1
+Add Pin To Net: Unknown Pin: Pin J3-2
+Add Pin To Net: Unknown Pin: Pin J3-3
+Add Pin To Net: Unknown Pin: Pin J3-4
+Add Pin To Net: Unknown Pin: Pin J3-5
+Add Pin To Net: Unknown Pin: Pin J3-6
+Add Pin To Net: Unknown Pin: Pin J3-7
+Add Pin To Net: Unknown Pin: Pin J3-8
+Add Pin To Net: Unknown Pin: Pin J3-9
+Add Pin To Net: Unknown Pin: Pin R9-1
+Add Pin To Net: Unknown Pin: Pin R9-2
+Add Pin To Net: Unknown Pin: Pin R16-1
+Add Pin To Net: Unknown Pin: Pin R16-2
+Add Pin To Net: Unknown Pin: Pin Y2-2
+Add Pin To Net: Unknown Pin: Pin Y2-4
+Add Class Member: Failed to add class member : Component *1 PTS526 SK15 SMTR2 LFS
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component ANT1 INVERTED F-ANTENNA
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C1 22uF
+Added Member To Class: ClassName=HEART_RATE Member=Component C2 CAP 0.1uF 0603
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C3 C0603C159C5GACTU
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C5 GRM188Z71C475KE21D
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C6 CAP 10nF 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C7 CAP 10uF 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C8 GRM188Z71C475KE21D
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C9 CAP 1uF 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C10 CAP 2.2uF 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C11 CAP 10nF 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component C12 CAP 0.1uF 0603
+Added Member To Class: ClassName=COMMUNICATION Member=Component C13 CAP 0.1uF 0603
+Added Member To Class: ClassName=COMMUNICATION Member=Component C14 CAP 0.1uF 0603
+Add Class Member: Failed to add class member : Component C15 CAP 1uF 0603
+Add Class Member: Failed to add class member : Component C16 CAP 1uF 0603
+Added Member To Class: ClassName=HEART_RATE Member=Component C17 GRM188Z71C475KE21D
+Add Class Member: Failed to add class member : Component C18 CAP 1uF 0603
+Added Member To Class: ClassName=HEART_RATE Member=Component C19 GRM188Z71C475KE21D
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C20 CAP 10uF 0603
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C28 CAP 100pF 0603
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C29 CAP 10pF 50V 0603
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C30 CAP 220nF 10V 0603
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component C31 CAP 10pF 50V 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component D1 824032815
+Added Member To Class: ClassName=POWER_BLOCK Member=Component D2 MBR120VLSFT1G
+Added Member To Class: ClassName=POWER_BLOCK Member=Component D3 MBR120VLSFT1G
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component FB1 BLM18AG601SZ1D
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component FB2 BLM18AG601SZ1D
+Added Member To Class: ClassName=POWER_BLOCK Member=Component H1 KXOB25-14X1F-TR
+Added Member To Class: ClassName=COMMUNICATION Member=Component H2 Mini SWD
+Added Member To Class: ClassName=POWER_BLOCK Member=Component J1 Female USB Type C
+Added Member To Class: ClassName=POWER_BLOCK Member=Component J2 B2B-XH-A(LF)(SN)
+Add Class Member: Failed to add class member : Component J3 TF13BA-10S-0.4SH(800)
+Added Member To Class: ClassName=POWER_BLOCK Member=Component L1 744029100
+Added Member To Class: ClassName=POWER_BLOCK Member=Component L2 744031220
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component L3 IND 1.9nH
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component L4 IND 1.9nH
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R1 RES 1.24M 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R2 RES 8.2M 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R3 RES 0R 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R4 RES 0R 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R5 RES 5.1K 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R6 RES 5.1K 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R7 RES 7.32M 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R8 RES 5.62M 0603
+Add Class Member: Failed to add class member : Component R9 RES 6.65M 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R10 RES 4.75M 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R11 RES 4.99M 0603
+Added Member To Class: ClassName=HEART_RATE Member=Component R12 RES 4.7K 0603
+Added Member To Class: ClassName=HEART_RATE Member=Component R13 RES 4.7K 0603
+Added Member To Class: ClassName=COMMUNICATION Member=Component R14 RES 4.7K 0603
+Added Member To Class: ClassName=COMMUNICATION Member=Component R15 RES 4.7K 0603
+Add Class Member: Failed to add class member : Component R16 RES 100R 0603
+Added Member To Class: ClassName=COMMUNICATION Member=Component R17 RES 0R 0603
+Added Member To Class: ClassName=HEART_RATE Member=Component R18 10 ohm
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component R19 RES 0R 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component TP1 Test Point
+Added Member To Class: ClassName=POWER_BLOCK Member=Component TP2 Test Point
+Added Member To Class: ClassName=POWER_BLOCK Member=Component TP3 Test Point
+Added Member To Class: ClassName=POWER_BLOCK Member=Component TP4 Test Point
+Added Member To Class: ClassName=POWER_BLOCK Member=Component TP6 Test Point
+Added Member To Class: ClassName=COMMUNICATION Member=Component TP7 Test Point
+Added Member To Class: ClassName=COMMUNICATION Member=Component TP8 Test Point
+Added Member To Class: ClassName=COMMUNICATION Member=Component TP9 Test Point
+Added Member To Class: ClassName=COMMUNICATION Member=Component TP10 Test Point
+Added Member To Class: ClassName=COMMUNICATION Member=Component TP11 Test Point
+Added Member To Class: ClassName=COMMUNICATION Member=Component TP12 Test Point
+Added Member To Class: ClassName=HEART_RATE Member=Component TP13 Test Point
+Added Member To Class: ClassName=HEART_RATE Member=Component TP14 Test Point
+Added Member To Class: ClassName=HEART_RATE Member=Component TP15 Test Point
+Added Member To Class: ClassName=HEART_RATE Member=Component TP16 Test Point
+Added Member To Class: ClassName=HEART_RATE Member=Component TP17 Test Point
+Added Member To Class: ClassName=LCD Member=Component TP18 Test Point
+Added Member To Class: ClassName=LCD Member=Component TP19 Test Point
+Added Member To Class: ClassName=LCD Member=Component TP20 Test Point
+Added Member To Class: ClassName=LCD Member=Component TP21 Test Point
+Added Member To Class: ClassName=POWER_BLOCK Member=Component U1 MIC5350-SGYMT-TR
+Added Member To Class: ClassName=EFR32G13_POWER_RESET Member=Component U2 512GM48-DR*
+Added Member To Class: ClassName=COMMUNICATION Member=Component U3 TXS0102DQER
+Added Member To Class: ClassName=POWER_BLOCK Member=Component U4 BQ25570RGRR
+Added Member To Class: ClassName=COMMUNICATION Member=Component U5 BMI270
+Added Member To Class: ClassName=HEART_RATE Member=Component U6 MAX32664GTGD+
+Added Member To Class: ClassName=HEART_RATE Member=Component U7 MAX30102EFD+T
+Added Member To Class: ClassName=HEART_RATE Member=Component Y1 ECS-327MV-DM-TR
+Add Class Member: Failed to add class member : Component Y2 38.4MHz XTAL

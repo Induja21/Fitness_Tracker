@@ -1,0 +1,51 @@
+Add component: Footprint Not Found SWITCH
+Add component: Footprint Not Found Capacitor 0603
+Add component: Footprint Not Found Capacitor 0603
+Add component: Footprint Not Found Capacitor 0603
+Add component: Footprint Not Found HRS_TF13BA-10S-0.4SH(800)
+Add component: Footprint Not Found RES_0603_1608X06
+Add component: Footprint Not Found RES_0603_1608X06
+Add component: Footprint Not Found XTAL 38.4MHz
+Add Pin To Net: Unknown Pin: Pin *1-1
+Add Pin To Net: Unknown Pin: Pin *1-2
+Add Pin To Net: Unknown Pin: Pin *1-3
+Add Pin To Net: Unknown Pin: Pin *1-4
+Add Pin To Net: Unknown Pin: Pin C15-1
+Add Pin To Net: Unknown Pin: Pin C15-2
+Add Pin To Net: Unknown Pin: Pin C16-1
+Add Pin To Net: Unknown Pin: Pin C16-2
+Add Pin To Net: Unknown Pin: Pin C18-1
+Add Pin To Net: Unknown Pin: Pin C18-2
+Add Pin To Net: Unknown Pin: Pin J3-1
+Add Pin To Net: Unknown Pin: Pin J3-2
+Add Pin To Net: Unknown Pin: Pin J3-3
+Add Pin To Net: Unknown Pin: Pin J3-4
+Add Pin To Net: Unknown Pin: Pin J3-5
+Add Pin To Net: Unknown Pin: Pin J3-6
+Add Pin To Net: Unknown Pin: Pin J3-7
+Add Pin To Net: Unknown Pin: Pin J3-8
+Add Pin To Net: Unknown Pin: Pin J3-9
+Add Pin To Net: Unknown Pin: Pin R9-1
+Add Pin To Net: Unknown Pin: Pin R9-2
+Add Pin To Net: Unknown Pin: Pin R16-1
+Add Pin To Net: Unknown Pin: Pin R16-2
+Add Pin To Net: Unknown Pin: Pin Y2-1
+Add Pin To Net: Unknown Pin: Pin Y2-2
+Add Pin To Net: Unknown Pin: Pin Y2-3
+Add Pin To Net: Unknown Pin: Pin Y2-4
+Add Class Member: Failed to add class member : Component *1 PTS526 SK15 SMTR2 LFS
+Add Class Member: Failed to add class member : Component C15 CAP 1uF 0603
+Add Class Member: Failed to add class member : Component C16 CAP 1uF 0603
+Add Class Member: Failed to add class member : Component C18 CAP 1uF 0603
+Add Class Member: Failed to add class member : Component J3 TF13BA-10S-0.4SH(800)
+Add Class Member: Failed to add class member : Component R9 RES 6.65M 0603
+Add Class Member: Failed to add class member : Component R16 RES 100R 0603
+Added Member To Class: ClassName=POWER_BLOCK Member=Component R20 RES 0R 0603
+Add Class Member: Failed to add class member : Component TP1 Test Point
+Add Class Member: Failed to add class member : Component TP2 Test Point
+Add Class Member: Failed to add class member : Component TP3 Test Point
+Add Class Member: Failed to add class member : Component TP4 Test Point
+Add Class Member: Failed to add class member : Component TP13 Test Point
+Add Class Member: Failed to add class member : Component TP14 Test Point
+Add Class Member: Failed to add class member : Component TP15 Test Point
+Add Class Member: Failed to add class member : Component Y2 38.4MHz XTAL

@@ -1,0 +1,11 @@
+Removed Pin From Net: NetName=GND Pin=U4-22
+Removed Pin From Net: NetName=GND Pin=U4-23
+Removed Pin From Net: NetName=GND Pin=U4-24
+Removed Pin From Net: NetName=GND Pin=U4-25
+Removed Pin From Net: NetName=GND Pin=U4-26
+Add component: Footprint Not Found Capacitor 0603
+Add component: Footprint Not Found RES_0603_1608X06
+Add Pin To Net: Unknown Pin: Pin L5-1
+Add Pin To Net: Unknown Pin: Pin L5-2
+Add Pin To Net: Unknown Pin: Pin R22-1
+Add Pin To Net: Unknown Pin: Pin R22-2

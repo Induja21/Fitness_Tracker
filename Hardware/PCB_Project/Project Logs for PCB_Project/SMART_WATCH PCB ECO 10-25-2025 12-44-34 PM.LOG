@@ -1,0 +1,40 @@
+Change Component Comment : Designator=C21 Old Comment=CAP 4.7uF 16V 0603 New Comment=16V
+Change Component Description : Designator=D1 Old Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes New Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815
+Change Component Description : Designator=D4 Old Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes New Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815
+Change Component Description : Designator=D5 Old Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes New Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815
+Change Component Description : Designator=D6 Old Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes New Description=824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815
+Change Component Description : Designator=L3 Old Description=Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes New Description=Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes |Murata LQG15WZ1N9S02D
+Change Component Description : Designator=L4 Old Description=Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes New Description=Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes |Murata LQG15WZ1N9S02D
+Change component parameters: Designator = "C1" ("C1"); Footprint = "Capacitor 0603"; UniqueID = "\CJDUJGGS" ("\CJDUJGGS")
+Change component parameters (AddParameter): Name = "Brand"; Value = "Murata Electronics"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Capacitance"; Value = "22 uF"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Case Code - in"; Value = "0603"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Case Code - mm"; Value = "1608"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "ComponentLink1Description"; Value = "http://www.farnell.com/datasheets/2047978.pdf?src-supplier=Element14"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "ComponentLink1URL"; Value = "http://www.farnell.com/datasheets/2047978.pdf?src-supplier=Element14"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Dielectric"; Value = "X5R"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Factory Pack Quantity"; Value = "4000"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Height"; Value = "0.8 mm"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Length"; Value = "1.6 mm"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Manufacturer"; Value = "Murata"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Manufacturer Part Number"; Value = "GRM188R61A226ME15D"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Maximum Operating Temperature"; Value = "+ 85 C"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Minimum Operating Temperature"; Value = "- 55 C"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Package / Case"; Value = "0603 (1608 metric)"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Packaging"; Value = "Reel"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Pricing 1"; Value = "1=0.33, 10=0.226, 50=0.1506, 100=0.1279, 500=0.0903, 1000=0.079 (USD)"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Product"; Value = "General Type MLCCs"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Product Category"; Value = "Multilayer Ceramic Capacitors MLCC - SMD/SMT"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "RoHS"; Value = "True"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Series"; Value = "GRM"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Stock 1"; Value = "849458"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Supplier 1"; Value = "Digi-Key"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Supplier Part Number 1"; Value = "490-10476-1-ND"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Termination Style"; Value = "SMD/SMT"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Tolerance"; Value = "20 %"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Type"; Value = "Voltage and Temperature Derating Recommended Product"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Unit Weight"; Value = "0.000222 oz"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Voltage Rating DC"; Value = "10V"; VariantName = "[No Variations]"
+Change component parameters (AddParameter): Name = "Width"; Value = "0.8 mm"; VariantName = "[No Variations]"
+Change Net Name : Old Net Name=Net*1_3 New Net Name=NetR16_1
+Change Net Name : Old Net Name=NetFB*_2 New Net Name=NetFB3_2

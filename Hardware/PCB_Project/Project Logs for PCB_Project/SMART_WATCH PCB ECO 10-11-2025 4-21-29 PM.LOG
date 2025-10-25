@@ -1,0 +1,2 @@
+Removed Pin From Net: NetName=MAX_MFIO Pin=U2-20
+Added Pin To Net: NetName=MAX_MFIO Pin=U2-8
