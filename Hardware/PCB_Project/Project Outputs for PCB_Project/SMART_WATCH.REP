@@ -2,138 +2,155 @@
 FileName = SMART_WATCH.GBR
 AutoAperture = True
 *************************************************************
-Generating : Top Component Center
-      File : SMART_WATCH.GM16
+Generating : Top Pad Master
+      File : SMART_WATCH.GPT
 
-    Adding Layer      : Top Component Center
+    Adding Layer      : Top Layer
 
-
-Used DCodes :
-    D10
-    D116
-*************************************************************
-
-*************************************************************
-Generating : Mechanical 15
-      File : SMART_WATCH.GM15
-
-    Adding Layer      : Mechanical 15
+    Adding Layer      : Multi-Layer
 
 
 Used DCodes :
-    D10
-    D13
-    D116
+    D19
+    D20
+    D21
+    D22
+    D23
+    D24
+    D25
+    D26
+    D27
+    D28
+    D29
+    D30
+    D31
+    D32
+    D33
+    D34
+    D35
+    D37
+    D38
+    D39
+    D40
+    D41
+    D42
+    D43
+    D44
+    D45
+    D46
+    D47
+    D48
+    D49
+    D50
+    D51
+    D52
+    D53
+    D54
+    D55
+    D56
+    D57
+    D58
+    D59
+    D60
+    D61
+    D100
+    D101
+    D103
+    D104
+    D105
+    D106
+    D107
+    D108
+    D113
+    D114
+    D115
 *************************************************************
 
 *************************************************************
-Generating : Mechanical 13
-      File : SMART_WATCH.GM13
+Generating : Top Overlay
+      File : SMART_WATCH.GTO
 
-    Adding Layer      : Mechanical 13
+    Adding Layer      : Top Overlay
 
 
 Used DCodes :
     D10
     D11
+    D12
+    D13
     D14
+    D15
     D16
     D17
-    D118
-    D119
 *************************************************************
 
 *************************************************************
-Generating : Top Component Outline
-      File : SMART_WATCH.GM11
+Generating : Top Solder
+      File : SMART_WATCH.GTS
 
-    Adding Layer      : Top Component Outline
+    Adding Layer      : Top Solder
+
+    Adding Layer      : Top Layer
+
+    Adding Layer      : Multi-Layer
 
 
 Used DCodes :
-    D10
-    D116
+    D19
+    D22
+    D23
+    D24
+    D40
+    D51
+    D56
+    D62
+    D63
+    D64
+    D65
+    D66
+    D67
+    D68
+    D69
+    D70
+    D71
+    D72
+    D73
+    D74
+    D75
+    D76
+    D77
+    D78
+    D79
+    D80
+    D81
+    D82
+    D83
+    D84
+    D85
+    D86
+    D87
+    D88
+    D89
+    D90
+    D91
+    D92
+    D93
+    D94
+    D95
+    D96
+    D97
+    D98
+    D99
+    D100
+    D101
+    D102
 *************************************************************
 
 *************************************************************
-Generating : Top Assembly
-      File : SMART_WATCH.GM5
+Generating : Bottom Solder
+      File : SMART_WATCH.GBS
 
-    Adding Layer      : Top Assembly
-
-
-Used DCodes :
-    D10
-    D16
-*************************************************************
-
-*************************************************************
-Generating : Top Designator
-      File : SMART_WATCH.GM4
-
-    Adding Layer      : Top Designator
-
-
-Used DCodes :
-    D10
-    D116
-    D117
-*************************************************************
-
-*************************************************************
-Generating : Top Courtyard
-      File : SMART_WATCH.GM3
-
-    Adding Layer      : Top Courtyard
-
-
-Used DCodes :
-    D10
-    D16
-    D116
-*************************************************************
-
-*************************************************************
-Generating : Top 3D Body
-      File : SMART_WATCH.GM2
-
-    Adding Layer      : Top 3D Body
-
-
-Used DCodes :
-    D10
-    D16
-    D116
-*************************************************************
-
-*************************************************************
-Generating : Mechanical 1
-      File : SMART_WATCH.GM1
-
-    Adding Layer      : Mechanical 1
-
-
-Used DCodes :
-    D10
-    D11
-*************************************************************
-
-*************************************************************
-Generating : Keep-Out Layer
-      File : SMART_WATCH.GKO
-
-    Adding Layer      : Keep-Out Layer
-
-
-Used DCodes :
-    D11
-*************************************************************
-
-*************************************************************
-Generating : Bottom Paste
-      File : SMART_WATCH.GBP
-
-    Adding Layer      : Bottom Paste
+    Adding Layer      : Bottom Solder
 
     Adding Layer      : Bottom Layer
 
@@ -141,6 +158,11 @@ Generating : Bottom Paste
 
 
 Used DCodes :
+    D99
+    D100
+    D101
+    D102
+    D119
 *************************************************************
 
 *************************************************************
@@ -198,13 +220,14 @@ Used DCodes :
     D58
     D59
     D60
+    D61
 *************************************************************
 
 *************************************************************
-Generating : Bottom Solder
-      File : SMART_WATCH.GBS
+Generating : Bottom Paste
+      File : SMART_WATCH.GBP
 
-    Adding Layer      : Bottom Solder
+    Adding Layer      : Bottom Paste
 
     Adding Layer      : Bottom Layer
 
@@ -212,149 +235,42 @@ Generating : Bottom Solder
 
 
 Used DCodes :
-    D98
-    D99
-    D115
 *************************************************************
 
 *************************************************************
-Generating : Top Solder
-      File : SMART_WATCH.GTS
+Generating : Keep-Out Layer
+      File : SMART_WATCH.GKO
 
-    Adding Layer      : Top Solder
-
-    Adding Layer      : Top Layer
-
-    Adding Layer      : Multi-Layer
+    Adding Layer      : Keep-Out Layer
 
 
 Used DCodes :
-    D21
-    D22
-    D23
-    D39
-    D50
-    D55
-    D61
-    D62
-    D63
-    D64
-    D65
-    D66
-    D67
-    D68
-    D69
-    D70
-    D71
-    D72
-    D73
-    D74
-    D75
-    D76
-    D77
-    D78
-    D79
-    D80
-    D81
-    D82
-    D83
-    D84
-    D85
-    D86
-    D87
-    D88
-    D89
-    D90
-    D91
-    D92
-    D93
-    D94
-    D95
-    D96
-    D97
-    D98
-    D99
+    D11
 *************************************************************
 
 *************************************************************
-Generating : Top Overlay
-      File : SMART_WATCH.GTO
+Generating : Mechanical 1
+      File : SMART_WATCH.GM1
 
-    Adding Layer      : Top Overlay
+    Adding Layer      : Mechanical 1
 
 
 Used DCodes :
     D10
     D11
-    D12
-    D13
-    D14
-    D15
-    D16
-    D17
 *************************************************************
 
 *************************************************************
-Generating : Top Pad Master
-      File : SMART_WATCH.GPT
+Generating : Top 3D Body
+      File : SMART_WATCH.GM2
 
-    Adding Layer      : Top Layer
-
-    Adding Layer      : Multi-Layer
+    Adding Layer      : Top 3D Body
 
 
 Used DCodes :
-    D19
-    D20
-    D21
-    D22
-    D23
-    D24
-    D25
-    D26
-    D27
-    D28
-    D29
-    D30
-    D31
-    D32
-    D33
-    D34
-    D36
-    D37
-    D38
-    D39
-    D40
-    D41
-    D42
-    D43
-    D44
-    D45
-    D46
-    D47
-    D48
-    D49
-    D50
-    D51
-    D52
-    D53
-    D54
-    D55
-    D56
-    D57
-    D58
-    D59
-    D60
-    D98
-    D99
-    D100
-    D101
-    D102
-    D103
-    D104
-    D105
-    D110
-    D111
+    D10
+    D16
+    D120
 *************************************************************
 
 *************************************************************
@@ -367,10 +283,79 @@ Generating : Bottom Pad Master
 
 
 Used DCodes :
-    D98
-    D99
-    D110
-    D111
+    D100
+    D101
+    D113
+    D114
+    D115
+*************************************************************
+
+*************************************************************
+Generating : Top Courtyard
+      File : SMART_WATCH.GM3
+
+    Adding Layer      : Top Courtyard
+
+
+Used DCodes :
+    D10
+    D16
+    D120
+*************************************************************
+
+*************************************************************
+Generating : Mechanical 15
+      File : SMART_WATCH.GM15
+
+    Adding Layer      : Mechanical 15
+
+
+Used DCodes :
+    D10
+    D13
+    D120
+*************************************************************
+
+*************************************************************
+Generating : Top Designator
+      File : SMART_WATCH.GM4
+
+    Adding Layer      : Top Designator
+
+
+Used DCodes :
+    D10
+    D120
+    D121
+*************************************************************
+
+*************************************************************
+Generating : Mechanical 13
+      File : SMART_WATCH.GM13
+
+    Adding Layer      : Mechanical 13
+
+
+Used DCodes :
+    D10
+    D11
+    D14
+    D16
+    D17
+    D122
+    D123
+*************************************************************
+
+*************************************************************
+Generating : Top Component Center
+      File : SMART_WATCH.GM16
+
+    Adding Layer      : Top Component Center
+
+
+Used DCodes :
+    D10
+    D120
 *************************************************************
 
 *************************************************************
@@ -385,14 +370,15 @@ Generating : Bottom Layer
 Used DCodes :
     D11
     D13
-    D98
-    D99
-    D110
-    D111
-    D112
+    D100
+    D101
     D113
     D114
     D115
+    D116
+    D117
+    D118
+    D119
 *************************************************************
 
 *************************************************************
@@ -423,7 +409,7 @@ Used DCodes :
     D32
     D33
     D34
-    D36
+    D35
     D37
     D38
     D39
@@ -448,11 +434,9 @@ Used DCodes :
     D58
     D59
     D60
-    D98
-    D99
+    D61
     D100
     D101
-    D102
     D103
     D104
     D105
@@ -466,6 +450,34 @@ Used DCodes :
     D113
     D114
     D115
+    D116
+    D117
+    D118
+    D119
+*************************************************************
+
+*************************************************************
+Generating : Top Assembly
+      File : SMART_WATCH.GM5
+
+    Adding Layer      : Top Assembly
+
+
+Used DCodes :
+    D10
+    D16
+*************************************************************
+
+*************************************************************
+Generating : Top Component Outline
+      File : SMART_WATCH.GM11
+
+    Adding Layer      : Top Component Outline
+
+
+Used DCodes :
+    D10
+    D120
 *************************************************************
 
 *************************************************************
@@ -479,7 +491,7 @@ Generating : Drill Drawing
 
 Used DCodes :
     D17
-    D120
+    D124
 *************************************************************
 
 *************************************************************
@@ -501,6 +513,6 @@ Generating : Profile
 
 
 Used DCodes :
-    D121
+    D125
 *************************************************************
 

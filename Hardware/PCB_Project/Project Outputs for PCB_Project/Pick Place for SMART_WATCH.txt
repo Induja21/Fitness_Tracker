@@ -4,19 +4,20 @@ C:\Users\karth\OneDrive\Desktop\ESD_LAB\LPEDT_Project\Hardware\PCB_Project\Proje
 ========================================================================================================================
 File Design Information:
 
-Date:       25/10/25
-Time:       12:59
-Revision:   e6f02cd099b455a46c0342efaf3f680f4af40d27
+Date:       26/10/25
+Time:       13:46
+Revision:   448f0114514d2c395319b8c567502825bccda1e6
 Variant:    No variations
 Units used: mil
 
 Designator Comment              Layer    Footprint                     Center-X(mil) Center-Y(mil) Rotation Description                                                                                                                
+H3         ""                   TopLayer PAD_Hole                      1611.220      112.205       0        ""                                                                                                                         
 C22        "CAP 0.1uF 0603"     TopLayer CAP_0603_1MM                  753.338       950.756       180      "0603 0.1 uF 10 V ±10% Tolerance X7R SMT Multilayer Ceramic Chip Capacitor"                                                
 R22        ""                   TopLayer RES_0603_1608X06              1258.000      1597.000      270      "Fixed Resistor, Metal Glaze/thick Film, 0.1W, 4700ohm, 75V, 1% +/-Tol, 100ppm/Cel, Surface Mount, 0603"                   
 L5         ""                   TopLayer Capacitor_0603                901.575       997.047       180      "Inductor Power Shielded Multi-Layer 4.7uH 20% 2MHz Ferrite 0.12A 0.65Ohm DCR 0603 T/R"                                    
-D6         824032815            TopLayer WE-TVS_DFN1610-2L             346.000       840.000       180      "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815"                                  
-D5         824032815            TopLayer WE-TVS_DFN1610-2L             1631.000      1590.000      90       "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815"                                  
-D4         824032815            TopLayer WE-TVS_DFN1610-2L             409.000       2143.000      180      "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815"                                  
+D6         824032815            TopLayer WE-TVS_DFN1610-2L             346.000       840.000       180      "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes"                                                              
+D5         824032815            TopLayer WE-TVS_DFN1610-2L             1631.000      1590.000      90       "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes"                                                              
+D4         824032815            TopLayer WE-TVS_DFN1610-2L             409.000       2143.000      180      "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes"                                                              
 SW1        ""                   TopLayer SWITCH                        1444.000      1541.000      0        "Switch Tactile SPST N.O. 0.05A 12VDC 200000Cycles Gull Wing Surface Mount T/R"                                            
 R16        ""                   TopLayer RES_0603_1608X06              1533.000      1395.000      180      "Fixed Resistor, Metal Glaze/thick Film, 0.1W, 100ohm, 75V, 1% +/-Tol, 100ppm/Cel, Surface Mount, 0603"                    
 R17        "RES 0R 0603"        TopLayer RES_0603_1608X06              1144.000      158.000       0        "GENERAL PURPOSE CHIP RESISTOR Metal Glaze/thick Film, 0.1W, 0ohm, Surface Mount, 0603"                                    
@@ -53,8 +54,8 @@ R4         "RES 0R 0603"        TopLayer RES_0603_1608X06              1320.000 
 R3         "RES 0R 0603"        TopLayer RES_0603_1608X06              1380.000      1880.000      90       "GENERAL PURPOSE CHIP RESISTOR Metal Glaze/thick Film, 0.1W, 0ohm, Surface Mount, 0603"                                    
 R2         "RES 8.2M 0603"      TopLayer RES_0603_1608X06              1088.000      1699.000      270      "Fixed Resistor, Metal Glaze/thick Film, 0.1W, 8200000ohm, 75V, 5% +/-Tol, 100ppm/Cel, Surface Mount, 0603"                
 R1         "RES 1.24M 0603"     TopLayer RES_0603_1608X06              907.394       1560.220      270      "1.24 MOhms ±1% 0.125W, 1/8W Chip Resistor 0603 (1608 Metric) Automotive AEC-Q200 Thick Film"                              
-L4         "IND 1.9nH"          TopLayer FERRITE_0402                  1816.441      841.721       0        "Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes |Murata LQG15WZ1N9S02D"                                                   
-L3         "IND 1.9nH"          TopLayer FERRITE_0402                  1642.126      841.721       0        "Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes |Murata LQG15WZ1N9S02D"                                                   
+L4         "IND 1.9nH"          TopLayer FERRITE_0402                  1816.441      841.721       0        "Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes"                                                                          
+L3         "IND 1.9nH"          TopLayer FERRITE_0402                  1642.126      841.721       0        "Inductor, 1.9Nh, 8Ghz, 0402 Rohs Compliant: Yes"                                                                          
 L2         744031220            TopLayer WE-TPC_3816                   671.173       1992.307      90       "22 µH Shielded Drum Core, Wirewound Inductor 510 mA 450mOhm Max Nonstandard"                                              
 L1         744029100            TopLayer WE-TPC_2813                   1040.000      1970.000      90       "10 µH Shielded Drum Core, Wirewound Inductor 650 mA 470mOhm Max Nonstandard"                                              
 J2         B2B-XH-A(LF)(SN)     TopLayer FP-B2B-XH-A_LF_SN-MFG         872.945       2214.748      180      "CONN HEADER VERT 2POS 2.5MM"                                                                                              
@@ -66,7 +67,7 @@ FB2        BLM18AG601SZ1D       TopLayer FERRITE_0603                  1465.535 
 FB1        BLM18AG601SZ1D       TopLayer FERRITE_0603                  1416.953      535.598       180      "Chip Ferrite Bead, 0603, 600O @ 100MHz, 0.38O, 25%, 500mA CMP-06046-002436-1"                                             
 D3         MBR120VLSFT1G        TopLayer ONSC-SOD-123FL-2-498-01_V     413.071       2071.000      0        "Schottky Power Rectifier, 2-Pin SOD-123, Pb-Free, Tape and Reel"                                                          
 D2         MBR120VLSFT1G        TopLayer ONSC-SOD-123FL-2-498-01_V     412.599       1971.866      0        "Schottky Power Rectifier, 2-Pin SOD-123, Pb-Free, Tape and Reel"                                                          
-D1         824032815            TopLayer WE-TVS_DFN1610-2L             1084.559      2162.583      0        "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes |Wurth Elektronik 824032815"                                  
+D1         824032815            TopLayer WE-TVS_DFN1610-2L             1084.559      2162.583      0        "824032815 Tvs Diode, Bidir, 5V, Dfn1610 Rohs Compliant: Yes"                                                              
 C31        "CAP 10pF 50V 0603"  TopLayer CAPACITOR_0603                1461.614      1004.921      0        "Ceramic Capacitor, Multilayer, Ceramic, 100V, 5% +Tol, 5% -Tol, C0G, 30ppm/Cel TC, 0.00001uF, Surface Mount, 0603"        
 C30        "CAP 220nF 10V 0603" TopLayer CAPACITOR_0603                1463.583      1076.772      0        "0603 0.22 uF 10 V ±10% Tolerance X7R SMT Multilayer Ceramic Capacitor"                                                    
 C29        "CAP 10pF 50V 0603"  TopLayer CAPACITOR_0603                1414.953      679.598       0        "Ceramic Capacitor, Multilayer, Ceramic, 100V, 5% +Tol, 5% -Tol, C0G, 30ppm/Cel TC, 0.00001uF, Surface Mount, 0603"        

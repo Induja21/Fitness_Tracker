@@ -1,0 +1,4 @@
+Added Component: Designator=H3(PAD Hole)
+Added Component: Designator=H4(PAD Hole)
+Added Member To Class: ClassName=COMMUNICATION Member=Component H3
+Added Member To Class: ClassName=COMMUNICATION Member=Component H4
