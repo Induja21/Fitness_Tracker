@@ -3,5 +3,5 @@ label: "fitness-tracker"
 quality: "unknown"
 project:
 - id: "main"
-  path: "fitness-tracker_LowPowerDesignBoard.slcp"
+  path: "fitness-tracker_LowPowerBoard.slcp"
   output: "."
