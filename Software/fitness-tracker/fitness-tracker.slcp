@@ -1,0 +1,71 @@
+# Silicon Labs Project Configuration Tools: slcp, v0, Component selection file.
+project_name: fitness-tracker
+label: fitness-tracker
+description: |
+  A minimal project structure, that serves as a starting point for custom Bluetooth applications. It contains a minimal GATT database that can be expanded to fit your application requirements. The application starts advertising after boot and restarts advertising after a connection is closed. It also supports Over-the-Air Device Firmware Upgrade (OTA DFU).
+category: Bluetooth Examples
+package: Bluetooth
+quality: production
+readme:
+- {path: ../../../../../Applications/Simplicity Studio.app/Contents/Eclipse/developer/sdks/gecko_sdk_suite/v3.2/app/bluetooth/documentation/example/soc_empty/readme.html}
+source:
+- {path: main.c}
+- {path: app.c}
+- {path: app_properties.c}
+tag: ['hardware:rf:band:2400']
+include:
+- path: .
+  file_list:
+  - {path: app.h}
+sdk: {id: gecko_sdk, version: 4.3.2}
+toolchain_settings: []
+component:
+- {id: EFR32BG13P632F512GM48}
+- {id: app_assert}
+- {id: app_log}
+- {id: bluetooth_feature_advertiser}
+- {id: bluetooth_feature_connection}
+- {id: bluetooth_feature_gatt}
+- {id: bluetooth_feature_gatt_server}
+- {id: bluetooth_feature_legacy_advertiser}
+- {id: bluetooth_feature_legacy_scanner}
+- {id: bluetooth_feature_scanner}
+- {id: bluetooth_feature_sm}
+- {id: bluetooth_feature_system}
+- {id: bluetooth_stack}
+- {id: bootloader_interface}
+- {id: brd4104a}
+- {id: cmsis_dsp}
+- {id: component_catalog}
+- {id: dmd_memlcd}
+- {id: emlib_i2c}
+- {id: emlib_letimer}
+- {id: gatt_configuration}
+- {id: glib}
+- instance: [sensor]
+  id: i2cspm
+- {id: iostream_recommended_stream}
+- {id: mpu}
+- {id: ota_dfu}
+- {id: power_manager_deepsleep}
+- {id: rail_util_pti}
+- {id: status_string}
+other_file:
+- {path: create_bl_files.bat}
+- {path: create_bl_files.sh}
+- {path: readme_img0.png}
+- {path: readme_img1.png}
+- {path: readme_img2.png}
+- {path: readme_img3.png}
+- {path: readme_img4.png}
+configuration:
+- {name: SL_STACK_SIZE, value: '2752'}
+- {name: SL_HEAP_SIZE, value: '9200'}
+- condition: [psa_crypto]
+  name: SL_PSA_KEY_USER_SLOT_COUNT
+  value: '0'
+ui_hints:
+  highlight:
+  - {path: readme.html, focus: true}
+  - {path: config/btconf/gatt_configuration.btconf}
+

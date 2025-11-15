@@ -1,0 +1,7 @@
+---
+label: "fitness-tracker"
+quality: "unknown"
+project:
+- id: "main"
+  path: "fitness-tracker.slcp"
+  output: "."
