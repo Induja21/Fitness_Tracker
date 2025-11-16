@@ -113,5 +113,6 @@ void readSensorHubVersion(void);
 bool isAValidHubVersion(void);
 
 uint8_t getLastReadBuffer(const uint8_t** readBuffer);
+float getHubVersion(void);
 
 #endif /* SRC_MAX32664_H_ */

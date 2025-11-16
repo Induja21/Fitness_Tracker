@@ -9,6 +9,7 @@
 #include "timer.h"
 #include "scheduler_max32664.h"
 #include "max32664.h"
+#include "ble.h"
 
 
 
@@ -45,6 +46,26 @@ typedef enum max32664InitOperationState
 
 static max32664InitOperationState_e currentInitStateMachineState = MAX32664_START_APP_MODE_OPERATION;
 static max32664InitState_e max32664CurrentInitState = MAX32664_INIT_IDLE;
+static void sendIndicationsOfMax32664version(float version);
+
+/* -------------------------------------------------------------------------------------
+ * convertToIEEE11073
+ * ------------------------------------------------------------------------------------
+ * @Purpose : This function converts a floating-point temperature value into the
+ *            IEEE 11073 32-bit floating-point format. It encodes the temperature
+ *            with an exponent of -2 (scaling factor of 100) to preserve two decimal
+ *            places while maintaining a compact representation.
+ * @Param   : float temperature - The temperature value to be converted.
+ * @Return  : uint32_t - The IEEE 11073 formatted 32-bit representation of the temperature.
+ *-------------------------------------------------------------------------------------*/
+static uint32_t convertToIEEE11073(float temperature) {
+    uint8_t exponent = 0xFE; // Exponent of -2 (i.e., divide by 100)
+    int32_t mantissa = (int32_t)(temperature * 100); // Scale to 2 decimal places
+
+    uint32_t ieee11073_value = ((uint32_t)exponent << 24) | (mantissa & 0x00FFFFFF);
+
+    return ieee11073_value;
+}
 void max32664StateMachine(sl_bt_msg_t *bleEvent)
 {
   allEvents_t event = INVALID_EVENT;
@@ -104,7 +125,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
             {
               if (event == COMP1_EVENT) {
                   //TODO: Un-comment below line
-                 // setBioSensorHubMfioPin();
+                  setBioSensorHubMfioPin();
                   readDeviceMode();
                   currentInitStateMachineState=MAX32664_STATE_APP_READ;
               }
@@ -128,6 +149,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                       max32664CurrentInitState = MAX32664_INIT_FAILED;
                     // Failed, reset state machine
                       currentInitStateMachineState=MAX32664_START_APP_MODE_OPERATION;
+                      sendIndicationsOfMax32664version(23.67);
                   }
 
               }
@@ -143,6 +165,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                    //Check If valid version
                  if(!isAValidHubVersion())
                  {
+                     sendIndicationsOfMax32664version(28.67);
                      max32664CurrentInitState = MAX32664_INIT_FAILED;
                    // Failed, reset state machine
                    currentInitStateMachineState=MAX32664_START_APP_MODE_OPERATION;
@@ -150,6 +173,9 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                  else
                  {
                      max32664CurrentInitState = MAX32664_INIT_SUCCESSFUL;
+                     float version = getHubVersion();
+                     sendIndicationsOfMax32664version(23.67);
+                     //sendIndicationsOfMax32664version(version);
                  }
 
 
@@ -171,4 +197,47 @@ max32664InitState_e getLatestInitState()
 
 }
 
+
+/* -------------------------------------------------------------------------------------
+ * sendIndicationsOfTemperature
+ * ------------------------------------------------------------------------------------
+ * @Purpose : This function prepares and transmits temperature data via BLE indications.
+ *            It converts the temperature value into the IEEE 11073 32-bit floating-point
+ *            format, updates the GATT database with the new value, and sends an indication
+ *            to the connected BLE client if the conditions are met. Additionally, it logs
+ *            errors and displays the temperature on a display if the operation is successful.
+ * @Param   : float temperature - The temperature value to be sent and displayed.
+ * @Return  : void
+ *-------------------------------------------------------------------------------------*/
+static void sendIndicationsOfMax32664version(float version)
+{
+  uint8_t htm_version_buffer[5] = {0};
+  htm_version_buffer[0] = 0x00; // Flags byte (0 for Celsius)
+  // Convert version to IEEE-11073 format
+  uint32_t ieee11073_temp = convertToIEEE11073(version);
+  memcpy(&htm_version_buffer[1], &ieee11073_temp, sizeof(ieee11073_temp));
+  // Update GATT database with new version value
+   sl_status_t sc = sl_bt_gatt_server_write_attribute_value(
+       gattdb_temperature_measurement,  // Handle from gatt_db.h
+       0,  // Offset (start of characteristic value)
+       sizeof(htm_version_buffer),
+       htm_version_buffer
+   );
+
+   //Get the connection handle
+   ble_data_struct_t* bleDataPtr = getBleData();
+   // Send indication if conditions are met
+   if (bleDataPtr->connection_open && bleDataPtr->ok_to_send_htm_indications && !bleDataPtr->indication_in_flight) {
+       sc = sl_bt_gatt_server_send_indication(
+           bleDataPtr->connection_handle, // Connection handle
+           gattdb_temperature_measurement, // Handle from gatt_db.h
+           sizeof(htm_version_buffer), // Length
+           htm_version_buffer // Data
+       );
+
+
+   }
+
+
+}
 
