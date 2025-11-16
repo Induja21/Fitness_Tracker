@@ -140,7 +140,7 @@ When used with the Measurement Interval characteristic, the Valid Range descript
   </service>
 
   <!--Heart Rate-->
-  <service advertise="false" id="heart_rate_0" name="Heart Rate" requirement="mandatory" sourceId="org.bluetooth.service.heart_rate" type="primary" uuid="180D">
+  <service advertise="false" id="heart_rate" name="Heart Rate" requirement="mandatory" sourceId="org.bluetooth.service.heart_rate" type="primary" uuid="180D">
     <informativeText>Abstract: This service exposes heart rate and other data from a Heart Rate Sensor intended for fitness applications.
 Summary: The HEART RATE Service exposes heart rate and other data related to a heart rate sensor intended for fitness applications.</informativeText>
 
@@ -151,43 +151,20 @@ Summary: The HEART RATE Service exposes heart rate and other data related to a h
         <notify authenticated="false" bonded="false" encrypted="false"/>
       </properties>
     </characteristic>
-  </service>
 
-  <!--Pulse Oximeter Service-->
-  <service advertise="false" id="pulse_oximeter_0" name="Pulse Oximeter Service" requirement="mandatory" sourceId="org.bluetooth.service.pulse_oximeter" type="primary" uuid="1822">
-    <informativeText>Abstract: This Service specification proposes a pulse oximetry server for use in consumer and professional healthcare applications.
-Summary: The Pulse Oximeter Service exposes pulse oximetry data related to a non-invasive pulse oximetry sensor for consumer and professional healthcare applications.</informativeText>
-
-    <!--PLX Spot-Check Measurement-->
-    <characteristic const="false" id="plx_spot_check_measurement" name="PLX Spot-Check Measurement" sourceId="org.bluetooth.characteristic.plx_spot_check_measurement" uuid="2A5E">
-      <informativeText>
-Summary: The PLX Spot-check Measurement characteristic, if supported, is used to send Spot-check measurements of SpO2 (Percent oxygen saturation of hemoglobin) and PR (pulse rate). This characteristic is a variable length structure containing the Flags field, the SpO2PR-Spot-Check field, and depending on the contents of the Flags field, the Timestamp field, the Measurement Status field, the Device and Sensor Status field, and/or the Pulse Amplitude Index field. </informativeText>
-      <value length="19" type="hex" variable_length="false"/>
-      <properties>
-        <indicate authenticated="false" bonded="false" encrypted="false"/>
-      </properties>
-    </characteristic>
-
-    <!--PLX Continuous Measurement-->
-    <characteristic const="false" id="plx_continuous_measurement" name="PLX Continuous Measurement" sourceId="org.bluetooth.characteristic.plx_continuous_measurement" uuid="2A5F">
-      <informativeText>
-Summary: The PLX Continuous Measurement characteristic, if supported, is used to send periodic pulse oximetry measurements. This characteristic is a variable length structure containing the Flags field (to indicate presence of optional fields), the SpO2PR-Normal field, and depending on the contents of the Flags field, the SpO2PR-Fast field, the SpO2PR-Slow field, the Measurement Status field, the Device and Sensor Status field, and/or the Pulse Amplitude Index field.</informativeText>
-      <value length="20" type="hex" variable_length="false"/>
-      <properties>
-        <notify authenticated="false" bonded="false" encrypted="false"/>
-      </properties>
-    </characteristic>
-  </service>
-
-  <!--Step Counter-->
-  <service advertise="false" id="StepCounter" name="Step Counter" requirement="mandatory" sourceId="" type="primary" uuid="959df838-1e30-4363-9365-162572eee029">
-
-    <!--Step Counter-->
-    <characteristic const="false" id="Steps" name="Step Counter" sourceId="" uuid="fe0781d2-fdd5-453e-b00c-65609509e889">
-      <value length="4" type="hex" variable_length="false">00</value>
+    <!--Body Sensor Location-->
+    <characteristic const="false" id="body_sensor_location" name="Body Sensor Location" sourceId="org.bluetooth.characteristic.body_sensor_location" uuid="2A38">
+      <value length="1" type="hex" variable_length="false"/>
       <properties>
         <read authenticated="false" bonded="false" encrypted="false"/>
-        <indicate authenticated="false" bonded="false" encrypted="false"/>
+      </properties>
+    </characteristic>
+
+    <!--Heart Rate Control Point-->
+    <characteristic const="false" id="heart_rate_control_point" name="Heart Rate Control Point" sourceId="org.bluetooth.characteristic.heart_rate_control_point" uuid="2A39">
+      <value length="1" type="hex" variable_length="false"/>
+      <properties>
+        <write authenticated="false" bonded="false" encrypted="false"/>
       </properties>
     </characteristic>
   </service>
