@@ -3,7 +3,7 @@
 
 
 #define MAX32664_RESET_PIN 13  // Example pin for RESET (Port B, Pin 13)
-#define MAX32664_MFIO_PIN  6  // Example pin for MFIO (Port F, Pin 6)
+#define MAX32664_MFIO_PIN  5  // Example pin for MFIO (Port F, Pin 6)
 #define MAX32664_I2C_ADDR  0x55 // Default I2C address for MAX32664
 #define CMD_DELAY_IN_US 60000
 
@@ -36,14 +36,40 @@ void max32664StartInitAppmode(void)
 }
 
 
+// Set the reset pin high
 void setBioSensorHubResetPin()
 {
     GPIO_PinOutSet(gpioPortB, max32664_hub.resetPin);
 }
 
+// Clear the reset pin low
+void clearBioSensorHubResetPin()
+{
+    GPIO_PinOutClear(gpioPortB, max32664_hub.resetPin);
+}
+
+// Set the MFIO pin high
 void setBioSensorHubMfioPin()
 {
-  GPIO_PinModeSet(gpioPortF, max32664_hub.mfioPin, gpioModeInputPull, 1);
+    GPIO_PinOutSet(gpioPortF, max32664_hub.mfioPin);
+}
+
+// Clear the MFIO pin low
+void clearBioSensorHubMfioPin()
+{
+    GPIO_PinOutClear(gpioPortF, max32664_hub.mfioPin);
+}
+
+// Configure the MFIO pin mode
+void configureBioSensorHubMfioPin()
+{
+    GPIO_PinModeSet(gpioPortF, max32664_hub.mfioPin, gpioModeInputPull, 1);
+}
+
+// Configure the reset pin mode
+void configureBioSensorHubResetPin()
+{
+    GPIO_PinModeSet(gpioPortB, max32664_hub.resetPin, gpioModePushPull, 0);
 }
 
 static I2C_TransferReturn_TypeDef startReadBioSensorReg( uint8_t command, uint8_t index, uint8_t *data, uint8_t len)
@@ -67,7 +93,9 @@ static I2C_TransferReturn_TypeDef startReadBioSensorReg( uint8_t command, uint8_
 }
 void readDeviceMode()
 {
-  lastReadSize=1;
+  lastReadSize=2;
+  readResponse[0]=0xFF;
+  readResponse[1]=0xFF;
   startReadBioSensorReg(READ_DEVICE_MODE, 0x00, readResponse, lastReadSize);
 
 }

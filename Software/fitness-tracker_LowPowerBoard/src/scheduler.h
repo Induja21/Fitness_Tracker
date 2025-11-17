@@ -33,6 +33,8 @@ typedef enum leTimerEvents
   COMP0_EVENT,
   COMP1_EVENT,
   I2C_TRANSFER_EVENT,
+  MAX_MFIO_EVENT,
+  BMI_INT1_EVENT,
   INVALID_EVENT
 }allEvents_t;
 
@@ -41,7 +43,8 @@ typedef enum leTimerEvents
 #define LETIMER0_COMP0 (1U << COMP0_EVENT)
 #define LETIMER0_COMP1 (1U << COMP1_EVENT)
 #define I2C_TRANSFER_DONE (1U << I2C_TRANSFER_EVENT)
-
+#define MAX_MFIO_INTERRUPT (1U << MAX_MFIO_EVENT)
+#define BMI_INTERRUPT1 (1U << BMI_INT1_EVENT)
 
 
 /* -------------------------------------------------------------------------------------
@@ -75,6 +78,9 @@ void schedulerSetEventComp1(void);
 void schedulerSetEventUF(void);
 
 void schedulerSetEventI2c(void);
+
+void schedulerSetEventPF5(void);
+void schedulerSetEventPF6(void);
 /* -------------------------------------------------------------------------------------
  * schedulerGetEvent()
  * -------------------------------------------------------------------------------------

@@ -36,11 +36,16 @@ typedef enum {
   BMI270_ACC_X_LSB   = 0x0C,
   BMI270_GYR_X_LSB   = 0x12,
   BMI270_INIT_STATUS = 0x21,
+  BMI270_FEAT_PAGE = 0x2F,
+  BMI270_FEAT_STEP_COUNTER_ADDR=0x32,
+  BMI270_INT1_IO_CONTROL=0x53,
+  BMI270_INT1_MAP_FEAT =0x56,
   BMI270_INIT_ADDR_0_REG = 0x5B,
   BMI270_INIT_ADDR_1_REG = 0x5C,
   BMI270_INIT_DATA_REG = 0x5E,
   BMI270_INIT_CTRL = 0x59,
   BMI270_POWER_CONF=0x7C,
+  BMI270_PWR_CTRL_REG = 0x7D,
   BMI270_CMD_REG     = 0x7E
 
 } bmi270_registers_t;
@@ -127,5 +132,12 @@ void startReadBMI270Reg(uint8_t reg, uint8_t *buffer, unsigned int len);
 void bmi270UpdatePowerMode(uint8_t value);
 void waitForDisablePowerMode(void);
 extern unsigned int configUploadOffset;
-
+void bmi270EnableAccel();
+void waitForAccelEnable();
+void startStepCounterEnable();
+void readSelectedFeaturePage();
+void enableStepOpAndWriteToFeaturePage();
+void resetStepCounterAndWriteToFeaturePage();
+void mapStepCounterToInterrupt1();
+void configureInt1ToOutputEnable();
 #endif /* SRC_BMI270_H_ */

@@ -238,7 +238,7 @@ void handle_ble_event(sl_bt_msg_t *event) {
             uint16_t characteristic = event->data.evt_gatt_server_characteristic_status.characteristic;
 
             // Check if this is a client characteristic configuration change
-            if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_temperature_measurement))
+            if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_heart_rate_measurement))
             {
                 if (client_config_flags & sl_bt_gatt_indication)
                 {

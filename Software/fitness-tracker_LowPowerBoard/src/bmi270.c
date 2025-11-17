@@ -10,6 +10,14 @@ static uint8_t readBuffer[8]={0};
 static uint8_t lastReadSize = 0;
 static uint8_t temp[256];
 static uint8_t readdata[2] = {0};
+
+#define FEAT_PAGE_NUM_FOR_STEP_OP 6
+#define STEP_COUNTER_RESET_POS 10
+#define STEP_DETECTOR_BIT_POS 11
+#define STEP_COUNTER_BIT_POS 12
+#define WATERMARK_LEVEL_MASK 0x03FF
+#define SET_WATERMARK_LEVEL 1
+
 /*! @name  Global array that stores the configuration file of BMI270 */
 
 
@@ -1061,4 +1069,80 @@ void startReadBMI270Reg(uint8_t reg, uint8_t *buffer, unsigned int len)
     I2C_TransferInit(bmi270_dev.i2c_cfg.i2c_port, &bmi_i2cTransfer);
     I2C_IntEnable(bmi270_dev.i2c_cfg.i2c_port, I2C_IEN_MSTOP);
     NVIC_EnableIRQ(I2C0_IRQn);
+}
+
+void bmi270EnableAccel()
+{
+  uint8_t data = 0x04;//Bit2=1 to enable accel
+  startWriteBMI270DataChunk(BMI270_PWR_CTRL_REG, &data, 1);
+
+}
+
+void waitForAccelEnable()
+{
+  timerWaitUs_interrupt(1000);
+}
+
+void startStepCounterEnable()
+{
+  uint8_t featpage=FEAT_PAGE_NUM_FOR_STEP_OP;
+  //First select the feature page which has step counter feature
+  startWriteBMI270DataChunk(BMI270_FEAT_PAGE, &featpage, 1);
+
+}
+
+void readSelectedFeaturePage()
+{
+  //Read from 0x32 for 2bytes SC_26 value
+  lastReadSize = 2;
+  memset(readBuffer,0,sizeof(readBuffer));
+  startReadBMI270Reg(BMI270_FEAT_STEP_COUNTER_ADDR, readBuffer, lastReadSize);
+
+}
+
+void enableStepOpAndWriteToFeaturePage()
+{
+    uint16_t sc26Value = (readBuffer[1]<<8) | readBuffer[0];
+    // Enable Step Counter and enable step detector
+    //sc26Value |= (1<<STEP_COUNTER_RESET_POS);
+    sc26Value |= (1<<STEP_DETECTOR_BIT_POS);
+    sc26Value |= (1<<STEP_COUNTER_BIT_POS);
+    //Clear the water mark level bits
+    sc26Value &= ~(WATERMARK_LEVEL_MASK);
+    //Water mark level
+    uint16_t watermarkLevel = SET_WATERMARK_LEVEL&WATERMARK_LEVEL_MASK;
+    sc26Value |= watermarkLevel;
+    uint8_t bufferData[2];
+    bufferData[0]=sc26Value&0xFF;
+    bufferData[1]=(sc26Value >> 8) & 0xFF;
+    //Write back to that page
+    startWriteBMI270DataChunk(BMI270_FEAT_STEP_COUNTER_ADDR,bufferData,2);
+}
+
+
+void resetStepCounterAndWriteToFeaturePage()
+{
+    uint16_t sc26Value = (readBuffer[1]<<8) | readBuffer[0];
+    // Enable Step Counter and enable step detector
+    sc26Value &= ~(1<<STEP_COUNTER_RESET_POS);
+
+    uint8_t bufferData[2];
+    bufferData[0]=sc26Value&0xFF;
+    bufferData[1]=(sc26Value >> 8) & 0xFF;
+    //Write back to that page
+    startWriteBMI270DataChunk(BMI270_FEAT_STEP_COUNTER_ADDR,bufferData,2);
+}
+
+void mapStepCounterToInterrupt1()
+{
+    uint8_t mapdata =0x01;
+    startWriteBMI270DataChunk(BMI270_INT1_MAP_FEAT, &mapdata, 1);
+
+}
+
+void configureInt1ToOutputEnable()
+{
+    uint8_t ctrldata =0x0A;
+    startWriteBMI270DataChunk(BMI270_INT1_IO_CONTROL, &ctrldata, 1);
+
 }

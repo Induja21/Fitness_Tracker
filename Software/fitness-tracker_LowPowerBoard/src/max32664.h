@@ -114,5 +114,10 @@ bool isAValidHubVersion(void);
 
 uint8_t getLastReadBuffer(const uint8_t** readBuffer);
 float getHubVersion(void);
-
+void setBioSensorHubResetPin();
+void clearBioSensorHubResetPin();
+void setBioSensorHubMfioPin();
+void clearBioSensorHubMfioPin();
+void configureBioSensorHubMfioPin();
+void configureBioSensorHubResetPin();
 #endif /* SRC_MAX32664_H_ */

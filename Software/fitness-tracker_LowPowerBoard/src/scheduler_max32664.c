@@ -19,12 +19,15 @@ typedef enum leTimerEvents
   COMP0_EVENT,
   COMP1_EVENT,
   I2C_TRANSFER_EVENT,
+  MAX_MFIO_EVENT,
+  BMI_INT1_EVENT,
   INVALID_EVENT
 }allEvents_t;
 
 typedef enum max32664InitOperationState
 {
     MAX32664_START_APP_MODE_OPERATION,
+    MAX32664_STATE_CLEAR_RESET_PIN,
     MAX32664_STATE_SET_RESET_PIN,
     MAX32664_STATE_APP_READ,
     MAX32664_STATE_APP_COMPLETE,
@@ -40,13 +43,15 @@ typedef enum max32664InitOperationState
 #define LETIMER0_COMP0 (1U << COMP0_EVENT)
 #define LETIMER0_COMP1 (1U << COMP1_EVENT)
 #define I2C_TRANSFER_DONE (1U << I2C_TRANSFER_EVENT)
+#define MAX_MFIO_INTERRUPT (1U << MAX_MFIO_EVENT)
+#define BMI_INTERRUPT1 (1U << BMI_INT1_EVENT)
 
 
 
 
 static max32664InitOperationState_e currentInitStateMachineState = MAX32664_START_APP_MODE_OPERATION;
 static max32664InitState_e max32664CurrentInitState = MAX32664_INIT_IDLE;
-static void sendIndicationsOfMax32664version(float version);
+static void sendIndicationsOfMax32664version(uint8_t version);
 
 /* -------------------------------------------------------------------------------------
  * convertToIEEE11073
@@ -79,7 +84,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
         uint8_t status_flags = bleEvent->data.evt_gatt_server_characteristic_status.status_flags;
          uint16_t client_config_flags = bleEvent->data.evt_gatt_server_characteristic_status.client_config_flags;
          uint16_t characteristic = bleEvent->data.evt_gatt_server_characteristic_status.characteristic;
-         if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_temperature_measurement))
+         if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_heart_rate_measurement))
          {
              if (client_config_flags & sl_bt_gatt_indication)
              {
@@ -113,19 +118,28 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
           case MAX32664_START_APP_MODE_OPERATION:
             {
               if (event == COMP1_EVENT) {
-                setBioSensorHubResetPin();
-                //Wait for 1 second
-                timerWaitUs_interrupt(10000);
-                currentInitStateMachineState = MAX32664_STATE_SET_RESET_PIN;
+                configureBioSensorHubResetPin();
+                setBioSensorHubMfioPin();
+                clearBioSensorHubResetPin();
+                //Wait for 20ms
+                timerWaitUs_interrupt(20000);
+                currentInitStateMachineState = MAX32664_STATE_CLEAR_RESET_PIN;
 
               }
+            }
+            break;
+          case MAX32664_STATE_CLEAR_RESET_PIN:
+            if (event == COMP1_EVENT) {
+                currentInitStateMachineState = MAX32664_STATE_SET_RESET_PIN;
+                setBioSensorHubResetPin();
+                //Wait for 1000ms
+                 timerWaitUs_interrupt(1000000);
             }
             break;
           case MAX32664_STATE_SET_RESET_PIN:
             {
               if (event == COMP1_EVENT) {
-                  //TODO: Un-comment below line
-                  setBioSensorHubMfioPin();
+                  configureBioSensorHubMfioPin();
                   readDeviceMode();
                   currentInitStateMachineState=MAX32664_STATE_APP_READ;
               }
@@ -138,7 +152,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                   //Read the result
                   const uint8_t* dataRead = NULL;
                   uint8_t buffsize= getLastReadBuffer(&dataRead);
-                  if(buffsize==1)
+                  if((buffsize==2) && (dataRead[0]==0x00) && (dataRead[1]==0x00))
                   {
                     currentInitStateMachineState=MAX32664_STATE_HUB_VERSION_READ;
                     readSensorHubVersion();
@@ -149,7 +163,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                       max32664CurrentInitState = MAX32664_INIT_FAILED;
                     // Failed, reset state machine
                       currentInitStateMachineState=MAX32664_START_APP_MODE_OPERATION;
-                      sendIndicationsOfMax32664version(23.67);
+                      sendIndicationsOfMax32664version(23);
                   }
 
               }
@@ -165,7 +179,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                    //Check If valid version
                  if(!isAValidHubVersion())
                  {
-                     sendIndicationsOfMax32664version(28.67);
+                     sendIndicationsOfMax32664version(28);
                      max32664CurrentInitState = MAX32664_INIT_FAILED;
                    // Failed, reset state machine
                    currentInitStateMachineState=MAX32664_START_APP_MODE_OPERATION;
@@ -174,7 +188,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                  {
                      max32664CurrentInitState = MAX32664_INIT_SUCCESSFUL;
                      float version = getHubVersion();
-                     sendIndicationsOfMax32664version(23.67);
+                     sendIndicationsOfMax32664version(23);
                      //sendIndicationsOfMax32664version(version);
                  }
 
@@ -209,19 +223,19 @@ max32664InitState_e getLatestInitState()
  * @Param   : float temperature - The temperature value to be sent and displayed.
  * @Return  : void
  *-------------------------------------------------------------------------------------*/
-static void sendIndicationsOfMax32664version(float version)
+static void sendIndicationsOfMax32664version(uint8_t version)
 {
-  uint8_t htm_version_buffer[5] = {0};
-  htm_version_buffer[0] = 0x00; // Flags byte (0 for Celsius)
+  uint8_t heart_rate_buffer[2] = {0};
+  heart_rate_buffer[0] = 0x00; // Flags byte (0 for Celsius)
   // Convert version to IEEE-11073 format
-  uint32_t ieee11073_temp = convertToIEEE11073(version);
-  memcpy(&htm_version_buffer[1], &ieee11073_temp, sizeof(ieee11073_temp));
+  //uint32_t ieee11073_temp = convertToIEEE11073(version);
+  memcpy(&heart_rate_buffer[1], &version, sizeof(version));
   // Update GATT database with new version value
    sl_status_t sc = sl_bt_gatt_server_write_attribute_value(
-       gattdb_temperature_measurement,  // Handle from gatt_db.h
+       gattdb_heart_rate_measurement,  // Handle from gatt_db.h
        0,  // Offset (start of characteristic value)
-       sizeof(htm_version_buffer),
-       htm_version_buffer
+       sizeof(heart_rate_buffer),
+       heart_rate_buffer
    );
 
    //Get the connection handle
@@ -230,9 +244,9 @@ static void sendIndicationsOfMax32664version(float version)
    if (bleDataPtr->connection_open && bleDataPtr->ok_to_send_htm_indications && !bleDataPtr->indication_in_flight) {
        sc = sl_bt_gatt_server_send_indication(
            bleDataPtr->connection_handle, // Connection handle
-           gattdb_temperature_measurement, // Handle from gatt_db.h
-           sizeof(htm_version_buffer), // Length
-           htm_version_buffer // Data
+           gattdb_heart_rate_measurement, // Handle from gatt_db.h
+           sizeof(heart_rate_buffer), // Length
+           heart_rate_buffer // Data
        );
 
 

@@ -53,7 +53,6 @@ component:
 - {id: memlcd_display_custom}
 - {id: memlcd_usart}
 - {id: mpu}
-- {id: ota_dfu}
 - {id: power_manager_deepsleep}
 - {id: rail_util_pti}
 - {id: status_string}

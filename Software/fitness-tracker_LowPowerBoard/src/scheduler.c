@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "em_core.h"
+#include "em_gpio.h"
 #include "i2c.h"
 #include "timer.h"
 #include "sl_power_manager.h"
@@ -149,6 +150,38 @@ void schedulerSetEventI2c(void)
   CORE_ENTER_CRITICAL();
 
   sl_bt_external_signal(I2C_TRANSFER_DONE);
+  // Exit critical section
+  CORE_EXIT_CRITICAL();
+}
+
+void schedulerSetEventPF5(void)
+{
+  // Clear the interrupt flag
+  uint32_t flags = GPIO_IntGet();
+  GPIO_IntClear(flags);
+  // Enter critical section
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  // Check if PF5 triggered the interrupt (interrupt source 5)
+  if (flags & (1 << 5)) {
+    sl_bt_external_signal(MAX_MFIO_INTERRUPT);
+  }
+  // Exit critical section
+  CORE_EXIT_CRITICAL();
+}
+
+void schedulerSetEventPF6(void)
+{
+  // Clear the interrupt flag
+  uint32_t flags = GPIO_IntGet();
+  GPIO_IntClear(flags);
+  // Enter critical section
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  // Check if PF6 triggered the interrupt (interrupt source 6)
+  if (flags & (1 << 6)) {
+    sl_bt_external_signal(BMI_INTERRUPT1);
+  }
   // Exit critical section
   CORE_EXIT_CRITICAL();
 }

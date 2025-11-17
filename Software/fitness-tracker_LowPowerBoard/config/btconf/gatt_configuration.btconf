@@ -148,7 +148,7 @@ Summary: The HEART RATE Service exposes heart rate and other data related to a h
     <characteristic const="false" id="heart_rate_measurement" name="Heart Rate Measurement" sourceId="org.bluetooth.characteristic.heart_rate_measurement" uuid="2A37">
       <value length="8" type="hex" variable_length="false"/>
       <properties>
-        <notify authenticated="false" bonded="false" encrypted="false"/>
+        <indicate authenticated="false" bonded="false" encrypted="false"/>
       </properties>
     </characteristic>
   </service>

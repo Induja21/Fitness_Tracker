@@ -766,6 +766,9 @@
       </folder>
     </folder>
   </folder>
+  <file name="main.c" linked="false" uri="studio:/project/main.c"/>
+  <file name="app.c" linked="false" uri="studio:/project/app.c"/>
+  <file name="app_properties.c" linked="false" uri="studio:/project/app_properties.c"/>
   <file name="app.h" linked="false" uri="studio:/project/app.h"/>
   <file name="create_bl_files.bat" linked="false" uri="studio:/project/create_bl_files.bat"/>
   <file name="create_bl_files.sh" linked="false" uri="studio:/project/create_bl_files.sh"/>

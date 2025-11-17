@@ -15,6 +15,8 @@ typedef enum leTimerEvents
   COMP0_EVENT,
   COMP1_EVENT,
   I2C_TRANSFER_EVENT,
+  MAX_MFIO_EVENT,
+  BMI_INT1_EVENT,
   INVALID_EVENT
 }allEvents_t;
 
@@ -34,18 +36,31 @@ typedef enum bmi270InitOperationState {
     BMI270_WAIT_BEFORE_INIT_CTRL,
     BMI270_SET_INIT_CTRL_1,
     BMI270_WAIT_INIT_CTRL_1,
-    BMI270_CHECK_INIT_STATUS,
+    BMI270_CHECK_INIT_STATUS,BMI270_START_ACCEL_ENABLE,
+    BMI270_WAIT_FOR_ACCEL_ENABLE,
+    BMI270_START_STEPCOUNTER_ENABLE,
+    BMI270_READ_SELECTED_FEATURE_RANGE,
+    BMI270_ENABLE_STEP_OP,
+    BMI270_MAP_STEP_COUNTER_TO_INTERRUPT,
+    BMI270_CONFIG_INT1,
     BMI270_STATE_INIT_COMPLETE
 } bmi270InitOperationState_e;
 
+typedef enum bmi270DataOperationState{
+  BMI270_WAIT_FOR_INTERRUPT,
+  BMI270_READ_STEP_COUNTER_DATA,
+  BMI270_SEND_INDICATION
+}bmi270DataOperationState_e;
 
 #define LETIMER0_UF    (1U << UF_EVENT)
 #define LETIMER0_COMP0 (1U << COMP0_EVENT)
 #define LETIMER0_COMP1 (1U << COMP1_EVENT)
 #define I2C_TRANSFER_DONE (1U << I2C_TRANSFER_EVENT)
+#define MAX_MFIO_INTERRUPT (1U << MAX_MFIO_EVENT)
+#define BMI_INTERRUPT1 (1U << BMI_INT1_EVENT)
 
 static bmi270InitOperationState_e currentInitStateMachineState = BMI270_START_INITIALIZATION;
-
+static bmi270DataOperationState_e currentDataHandlingStateMachineState = BMI270_WAIT_FOR_INTERRUPT;
 static bmi270InitStatus_e bmi270InitStatus = BMI270_INIT_IDLE;
 
 void bmi270StateMachine(sl_bt_msg_t *bleEvent)
@@ -220,13 +235,59 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
               case BMI270_CHECK_INIT_STATUS:
                 if(event == I2C_TRANSFER_EVENT) {
                   if(isBMI270InitSuccessful()) {
-                      bmi270InitStatus = BMI270_INIT_SUCCESSFUL;
+                      currentInitStateMachineState=BMI270_START_ACCEL_ENABLE;
+                      bmi270EnableAccel();
+
                   } else {
                       bmi270InitStatus = BMI270_INIT_FAILED;
                       currentInitStateMachineState = BMI270_START_INITIALIZATION;
                   }
                 }
                   break;
+              case BMI270_START_ACCEL_ENABLE:
+                if(event == I2C_TRANSFER_EVENT) {
+                    currentInitStateMachineState=BMI270_WAIT_FOR_ACCEL_ENABLE;
+                    waitForAccelEnable();
+                }
+                break;
+              case BMI270_WAIT_FOR_ACCEL_ENABLE:
+                if(event == COMP1_EVENT) {
+                    currentInitStateMachineState=BMI270_START_STEPCOUNTER_ENABLE;
+                    startStepCounterEnable();
+                }
+                break;
+              case BMI270_START_STEPCOUNTER_ENABLE:
+                if(event == I2C_TRANSFER_EVENT) {
+                    currentInitStateMachineState=BMI270_READ_SELECTED_FEATURE_RANGE;
+                    readSelectedFeaturePage();
+                }
+                break;
+
+              case BMI270_READ_SELECTED_FEATURE_RANGE:
+                if(event == I2C_TRANSFER_EVENT) {
+                    currentInitStateMachineState=BMI270_ENABLE_STEP_OP;
+                    enableStepOpAndWriteToFeaturePage();
+                }
+                break;
+
+              case BMI270_ENABLE_STEP_OP:
+                if(event == I2C_TRANSFER_EVENT) {
+                    currentInitStateMachineState=BMI270_MAP_STEP_COUNTER_TO_INTERRUPT;
+                    mapStepCounterToInterrupt1();
+                }
+                break;
+              case BMI270_MAP_STEP_COUNTER_TO_INTERRUPT:
+                if(event == I2C_TRANSFER_EVENT) {
+                    currentInitStateMachineState=BMI270_CONFIG_INT1;
+                    configureInt1ToOutputEnable();
+                }
+                break;
+              case BMI270_CONFIG_INT1:
+                if(event == I2C_TRANSFER_EVENT) {
+                    currentInitStateMachineState=BMI270_STATE_INIT_COMPLETE;
+                    bmi270InitStatus = BMI270_INIT_SUCCESSFUL;
+                }
+                break;
 
               default:
                   break;
@@ -239,3 +300,67 @@ bmi270InitStatus_e getLatestBmi270InitState()
   return bmi270InitStatus;
 
 }
+
+
+void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
+{
+  allEvents_t event = INVALID_EVENT;
+   switch (SL_BT_MSG_ID(bleEvent->header)) {
+     case sl_bt_evt_connection_opened_id:
+         break;
+     case sl_bt_evt_connection_closed_id:
+       break;
+     case sl_bt_evt_gatt_server_characteristic_status_id:
+       break;
+     case sl_bt_evt_system_external_signal_id:
+       if(bleEvent->data.evt_system_external_signal.extsignals & I2C_TRANSFER_DONE)
+       {
+           event = I2C_TRANSFER_EVENT;
+       }else if (bleEvent->data.evt_system_external_signal.extsignals & LETIMER0_UF) {
+           event = UF_EVENT;
+       } else if (bleEvent->data.evt_system_external_signal.extsignals & LETIMER0_COMP0) {
+           event = COMP0_EVENT;
+       } else if (bleEvent->data.evt_system_external_signal.extsignals & LETIMER0_COMP1) {
+           event = COMP1_EVENT;
+       }else if (bleEvent->data.evt_system_external_signal.extsignals & MAX_MFIO_INTERRUPT) {
+           event = MAX_MFIO_EVENT;
+       }else if (bleEvent->data.evt_system_external_signal.extsignals & BMI_INTERRUPT1) {
+           event = BMI_INT1_EVENT;
+       }
+       break;
+     default:
+       break;
+   }
+
+   if(SL_BT_MSG_ID(bleEvent->header) == sl_bt_evt_system_external_signal_id) {
+       switch (currentDataHandlingStateMachineState) {
+         case BMI270_WAIT_FOR_INTERRUPT:
+           {
+             if(event==BMI_INT1_EVENT)
+               {
+                 currentDataHandlingStateMachineState=BMI270_READ_STEP_COUNTER_DATA;
+                 //Call Read Step COunter data
+               }
+
+           }
+           break;
+         case BMI270_READ_STEP_COUNTER_DATA:
+           {
+             if(event==I2C_TRANSFER_EVENT)
+             {
+                 currentDataHandlingStateMachineState=BMI270_SEND_INDICATION;
+             }
+
+           }
+           break;
+         case BMI270_SEND_INDICATION:
+           {
+             currentDataHandlingStateMachineState=BMI270_WAIT_FOR_INTERRUPT;
+           }
+           break;
+         default:
+           break;
+       }
+   }
+}
+

@@ -79,6 +79,22 @@ void I2C0_IRQHandler(void) {
             LOG_ERROR("I2C Transfer Failed! Error Code: %d", i2cTransferStatus);
       }
 }
+
+// In the IRQ handler
+void GPIO_EVEN_IRQHandler(void)
+{
+
+  schedulerSetEventPF6();
+
+}
+
+// In the IRQ handler
+void GPIO_ODD_IRQHandler(void)
+{
+
+  schedulerSetEventPF5();
+
+}
 /* -------------------------------------------------------------------------------------
  * letimerMilliseconds
  * ------------------------------------------------------------------------------------
