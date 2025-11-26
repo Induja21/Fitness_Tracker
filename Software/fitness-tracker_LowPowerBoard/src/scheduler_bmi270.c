@@ -83,7 +83,7 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
          uint8_t status_flags = bleEvent->data.evt_gatt_server_characteristic_status.status_flags;
           uint16_t client_config_flags = bleEvent->data.evt_gatt_server_characteristic_status.client_config_flags;
           uint16_t characteristic = bleEvent->data.evt_gatt_server_characteristic_status.characteristic;
-          if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_temperature_measurement))
+          if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_Steps))
           {
               if (client_config_flags & sl_bt_gatt_indication)
               {
@@ -338,7 +338,7 @@ static void sendIndicationsOfStepCount(uint32_t stepCount)
 
   // 1. Update GATT database with new step value so read requests get the latest data
   sl_status_t sc = sl_bt_gatt_server_write_attribute_value(
-      gattdb_heart_rate_measurement,   // You must define this in your GATT Configurator
+      gattdb_Steps,   // You must define this in your GATT Configurator
       0,                   // Offset
       sizeof(step_buffer), // Length (4 bytes)
       step_buffer          // Data
@@ -355,12 +355,12 @@ static void sendIndicationsOfStepCount(uint32_t stepCount)
   // Note: You need to add 'ok_to_send_step_indications' to your ble_data_struct_t
   // and update it when the CCCD for the step characteristic is changed.
   if (bleDataPtr->connection_open &&
-      bleDataPtr->ok_to_send_htm_indications &&
-      !bleDataPtr->indication_in_flight)
+      bleDataPtr->ok_to_send_stepCounter_indications &&
+      !bleDataPtr->indication_in_flight_stepCounter)
   {
       sc = sl_bt_gatt_server_send_indication(
           bleDataPtr->connection_handle,
-          gattdb_heart_rate_measurement,    // Handle from gatt_db.h
+          gattdb_Steps,    // Handle from gatt_db.h
           sizeof(step_buffer),  // Length
           step_buffer           // Data
       );
@@ -370,7 +370,7 @@ static void sendIndicationsOfStepCount(uint32_t stepCount)
       } else {
           // Mark indication as in flight to prevent overlapping sends
           // You typically clear this flag in the sl_bt_evt_gatt_server_characteristic_status_id event
-          bleDataPtr->indication_in_flight = true;
+          bleDataPtr->indication_in_flight_stepCounter = true;
       }
   }
 }

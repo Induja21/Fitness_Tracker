@@ -1136,7 +1136,7 @@ void enableStepOpAndWriteToFeaturePage()
       //   - en_detector (Bit 11) = 1 (Enable Detector for per-step detection)
       //   - en_counter  (Bit 12) = 1 (Enable Counter)
       step_config[0] = 0x01; // LSB (Watermark low byte)
-      step_config[1] = 0x18; // MSB (Enables + Watermark high bits)
+      step_config[1] = 0x10; // MSB (Enables + Watermark high bits)
 
       // Bytes 2-3: SC_27 (Address 0x34)
       // Value: 0x0002

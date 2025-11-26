@@ -84,7 +84,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
         uint8_t status_flags = bleEvent->data.evt_gatt_server_characteristic_status.status_flags;
          uint16_t client_config_flags = bleEvent->data.evt_gatt_server_characteristic_status.client_config_flags;
          uint16_t characteristic = bleEvent->data.evt_gatt_server_characteristic_status.characteristic;
-         if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_heart_rate_measurement))
+         if ((status_flags == sl_bt_gatt_server_client_config)&&((characteristic == gattdb_heart_rate_measurement)|| (characteristic== gattdb_Steps)))
          {
              if (client_config_flags & sl_bt_gatt_indication)
              {
@@ -241,7 +241,7 @@ static void sendIndicationsOfMax32664version(uint8_t version)
    //Get the connection handle
    ble_data_struct_t* bleDataPtr = getBleData();
    // Send indication if conditions are met
-   if (bleDataPtr->connection_open && bleDataPtr->ok_to_send_htm_indications && !bleDataPtr->indication_in_flight) {
+   if (bleDataPtr->connection_open && bleDataPtr->ok_to_send_heartrate_indications && !bleDataPtr->indication_in_flight_heartrate) {
        sc = sl_bt_gatt_server_send_indication(
            bleDataPtr->connection_handle, // Connection handle
            gattdb_heart_rate_measurement, // Handle from gatt_db.h

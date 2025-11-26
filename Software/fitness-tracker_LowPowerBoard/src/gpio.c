@@ -182,13 +182,13 @@ void gpioInterruptConfigure(void)
     GPIO_PinModeSet(gpioPortF, BMI_INT1_PIN, gpioModeInputPullFilter, 0);
 
     // Configure MFIO also as input with no pull
-    GPIO_PinModeSet(gpioPortF, MAX_MFIO_PIN, gpioModeInputPullFilter, 0);
+  //  GPIO_PinModeSet(gpioPortF, MAX_MFIO_PIN, gpioModeInputPullFilter, 0);
 
     // BMI INT1 → interrupt on RISING edge ONLY
     GPIO_ExtIntConfig(gpioPortF, BMI_INT1_PIN, BMI_INT1_PIN, true, false, true);
 
     // MFIO same config
-    GPIO_ExtIntConfig(gpioPortF, MAX_MFIO_PIN, MAX_MFIO_PIN, true, false, true);
+   // GPIO_ExtIntConfig(gpioPortF, MAX_MFIO_PIN, MAX_MFIO_PIN, true, false, true);
 
     // Clear IRQ flags and enable NVIC
     NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);

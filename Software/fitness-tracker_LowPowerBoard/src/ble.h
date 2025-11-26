@@ -46,8 +46,10 @@ typedef struct {
     // Values unique for server
     uint8_t advertisingSetHandle;
     bool connection_open; // True when in an open connection
-    bool ok_to_send_htm_indications; // True when client enabled indications
-    bool indication_in_flight; // True when an indication is in-flight
+    bool ok_to_send_heartrate_indications; // True when client enabled indications
+    bool indication_in_flight_heartrate; // True when an indication is in-flight
+    bool ok_to_send_stepCounter_indications; // True when client enabled indications
+    bool indication_in_flight_stepCounter; // True when an indication is in-flight
 
     // Values unique for client (not used in this example)
 } ble_data_struct_t;

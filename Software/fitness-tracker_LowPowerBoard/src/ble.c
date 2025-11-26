@@ -55,8 +55,10 @@
 static ble_data_struct_t ble_data = {
     .advertisingSetHandle = 0xFF, // Initialize to an invalid value
     .connection_open = false,
-    .ok_to_send_htm_indications = false,
-    .indication_in_flight = false
+    .ok_to_send_heartrate_indications = false,
+    .indication_in_flight_heartrate = false,
+    .ok_to_send_stepCounter_indications = false,
+    .indication_in_flight_stepCounter = false
 };
 /* -------------------------------------------------------------------------------------
  * getBleData
@@ -216,7 +218,8 @@ void handle_ble_event(sl_bt_msg_t *event) {
         case sl_bt_evt_connection_closed_id: {
             // Update connection status
             ble_data.connection_open = false;
-            ble_data.ok_to_send_htm_indications = false; // Disable indications when connection is closed
+            ble_data.ok_to_send_stepCounter_indications = false; // Disable indications when connection is closed
+            ble_data.ok_to_send_heartrate_indications = false;
             displayPrintf(DISPLAY_ROW_CONNECTION, "Advertising");
 
             // Restart advertising when the connection is closed
@@ -238,35 +241,35 @@ void handle_ble_event(sl_bt_msg_t *event) {
             uint16_t characteristic = event->data.evt_gatt_server_characteristic_status.characteristic;
 
             // Check if this is a client characteristic configuration change
-            if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_heart_rate_measurement))
+            if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_Steps))
             {
                 if (client_config_flags & sl_bt_gatt_indication)
                 {
                   //Set a flag here to allow sending indications
-                  ble_data.ok_to_send_htm_indications = true;
+                  ble_data.ok_to_send_stepCounter_indications = true;
 
                 }
                 else
                 {
                   // Clear the flag here to stop sending indications
-                  ble_data.ok_to_send_htm_indications = false;
+                  ble_data.ok_to_send_stepCounter_indications = false;
                   displayPrintf(DISPLAY_ROW_TEMPVALUE,"");
                 }
             }
             // Check if this is an indication confirmation
             else if (status_flags == sl_bt_gatt_server_confirmation)
             {
-              if (characteristic == gattdb_temperature_measurement)
+              if (characteristic == gattdb_Steps)
               {
-                // Indication for temperature measurement was confirmed
+                // Indication for step measurement was confirmed
                 // Clear a flag here to allow sending the next indication
-                ble_data.indication_in_flight = false;
+                ble_data.indication_in_flight_stepCounter = false;
               }
             }
             break;
           }
         case sl_bt_evt_gatt_server_indication_timeout_id:
-          ble_data.indication_in_flight = false;
+          ble_data.indication_in_flight_stepCounter = false;
           break;
         default:
             break;
