@@ -7,6 +7,7 @@
 #include "scheduler_bmi270.h"
 #include "bmi270.h"
 #include "gatt_db.h"
+#include "ble.h"
 
 
 typedef enum leTimerEvents
@@ -51,6 +52,7 @@ typedef enum bmi270InitOperationState {
 
 typedef enum bmi270DataOperationState{
   BMI270_WAIT_FOR_INTERRUPT,
+  BMI270_READ_BMI_INT_STATUS_REG,
   BMI270_READ_STEP_COUNTER_DATA,
   BMI270_SEND_INDICATION
 }bmi270DataOperationState_e;
@@ -65,6 +67,7 @@ typedef enum bmi270DataOperationState{
 static bmi270InitOperationState_e currentInitStateMachineState = BMI270_START_INITIALIZATION;
 static bmi270DataOperationState_e currentDataHandlingStateMachineState = BMI270_WAIT_FOR_INTERRUPT;
 static bmi270InitStatus_e bmi270InitStatus = BMI270_INIT_IDLE;
+
 
 void bmi270StateMachine(sl_bt_msg_t *bleEvent)
 {
@@ -308,15 +311,7 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
                     bmi270InitStatus = BMI270_INIT_SUCCESSFUL;
                 }
                 break;
-//              case BMI270_STATE_INIT_COMPLETE:
-//                {
-//                  if(event == I2C_TRANSFER_EVENT)
-//                    {
-//
-//                    }
-//
-//                }
-//                break;
+
               default:
                   break;
           }
@@ -329,6 +324,56 @@ bmi270InitStatus_e getLatestBmi270InitState()
 
 }
 
+static void sendIndicationsOfStepCount(uint32_t stepCount)
+{
+  // Buffer for 32-bit integer (4 bytes)
+  // Note: Unlike HTM, we don't strictly need a 'Flags' byte unless your
+  // custom characteristic specification requires it.
+  // Here we send just the raw 32-bit value.
+  uint8_t step_buffer[4];
+
+  // Copy the uint32_t stepCount into the byte buffer (Little Endian)
+  // SiLabs/ARM Cortex-M is Little Endian, so memcpy works directly.
+  memcpy(step_buffer, &stepCount, sizeof(stepCount));
+
+  // 1. Update GATT database with new step value so read requests get the latest data
+  sl_status_t sc = sl_bt_gatt_server_write_attribute_value(
+      gattdb_heart_rate_measurement,   // You must define this in your GATT Configurator
+      0,                   // Offset
+      sizeof(step_buffer), // Length (4 bytes)
+      step_buffer          // Data
+  );
+
+//  if (sc != SL_STATUS_OK) {
+//      LOG_ERROR("Failed to update GATT database with step count %d", (int)sc);
+//  }
+
+  // Get the BLE context
+  ble_data_struct_t* bleDataPtr = getBleData();
+
+  // 2. Send Indication if connection is active and notifications/indications are enabled
+  // Note: You need to add 'ok_to_send_step_indications' to your ble_data_struct_t
+  // and update it when the CCCD for the step characteristic is changed.
+  if (bleDataPtr->connection_open &&
+      bleDataPtr->ok_to_send_htm_indications &&
+      !bleDataPtr->indication_in_flight)
+  {
+      sc = sl_bt_gatt_server_send_indication(
+          bleDataPtr->connection_handle,
+          gattdb_heart_rate_measurement,    // Handle from gatt_db.h
+          sizeof(step_buffer),  // Length
+          step_buffer           // Data
+      );
+
+      if (sc != SL_STATUS_OK) {
+          //LOG_ERROR("Failed to send step indication %d", (int)sc);
+      } else {
+          // Mark indication as in flight to prevent overlapping sends
+          // You typically clear this flag in the sl_bt_evt_gatt_server_characteristic_status_id event
+          bleDataPtr->indication_in_flight = true;
+      }
+  }
+}
 
 void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
 {
@@ -366,17 +411,29 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
            {
              if(event==BMI_INT1_EVENT)
                {
-                 currentDataHandlingStateMachineState=BMI270_READ_STEP_COUNTER_DATA;
+                 currentDataHandlingStateMachineState=BMI270_READ_BMI_INT_STATUS_REG;
+                 bmi270StartReadingIntStatus0Reg();
                  //Call Read Step COunter data
                }
 
+           }
+           break;
+         case BMI270_READ_BMI_INT_STATUS_REG:
+           if(event==I2C_TRANSFER_EVENT)
+           {
+               uint8_t intStatusRegistrer0 = getIntStatus0Value();
+               currentDataHandlingStateMachineState=BMI270_READ_STEP_COUNTER_DATA;
+               bmi270StartReadingStepCounterData();
            }
            break;
          case BMI270_READ_STEP_COUNTER_DATA:
            {
              if(event==I2C_TRANSFER_EVENT)
              {
+                 uint32_t stepcounter = getStepCounterData();
                  currentDataHandlingStateMachineState=BMI270_SEND_INDICATION;
+                 sendIndicationsOfStepCount(stepcounter);
+
              }
 
            }

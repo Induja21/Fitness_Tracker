@@ -1097,7 +1097,7 @@ void startStepCounterEnable()
 //  //First select the feature page which has step counter feature
 //  startWriteBMI270DataChunk(BMI270_FEAT_PAGE, &featpage, 1);
 
-  uint8_t featpage=0x01;
+  uint8_t featpage=0x06;
   //First select the feature page which has step counter feature
   startWriteBMI270DataChunk(BMI270_FEAT_PAGE, &featpage, 1);
 
@@ -1129,16 +1129,31 @@ void enableStepOpAndWriteToFeaturePage()
 //    bufferData[1]=(sc26Value >> 8) & 0xFF;
 //    //Write back to that page
 //    startWriteBMI270DataChunk(BMI270_FEAT_STEP_COUNTER_ADDR,bufferData,2);
+      uint8_t step_config[4];
+    // Bytes 0-1: SC_26 (Address 0x32)
+      // Value: 0x1801
+      //   - Watermark (Bits 9:0) = 1 (Least valid value, triggers every 20 steps)
+      //   - en_detector (Bit 11) = 1 (Enable Detector for per-step detection)
+      //   - en_counter  (Bit 12) = 1 (Enable Counter)
+      step_config[0] = 0x01; // LSB (Watermark low byte)
+      step_config[1] = 0x18; // MSB (Enables + Watermark high bits)
 
+      // Bytes 2-3: SC_27 (Address 0x34)
+      // Value: 0x0002
+      //   - out_conf_step_detector (Bits 3:0) = 0x2 (Map to Internal BIT_1)
+      //   - out_conf_activity      (Bits 7:4) = 0x0 (Disabled/Default)
+      step_config[2] = 0x02; // LSB (out_conf)
+      step_config[3] = 0x00; // MSB (Activity config)
+      startWriteBMI270DataChunk(BMI270_FEAT_STEP_COUNTER_ADDR,step_config,4);
 
-  uint8_t anymotion_cfg[4];
-
-  anymotion_cfg[0] = 0x02;
-  anymotion_cfg[1] = 0xE0;
-  anymotion_cfg[2] = 0x0A;
-  anymotion_cfg[3] = 0xB8;
-
-  startWriteBMI270DataChunk(BMI270_FEAT_ANY_MOTION_ADDR, anymotion_cfg, 4);
+//  uint8_t anymotion_cfg[4];
+//
+//  anymotion_cfg[0] = 0x02;
+//  anymotion_cfg[1] = 0xE0;
+//  anymotion_cfg[2] = 0x0A;
+//  anymotion_cfg[3] = 0xB8;
+//
+//  startWriteBMI270DataChunk(BMI270_FEAT_ANY_MOTION_ADDR, anymotion_cfg, 4);
 
 }
 
@@ -1146,6 +1161,43 @@ void bmi270RestoreFeaturePage(void)
 {
     uint8_t featpage = 0x00;   // Default feature page
     startWriteBMI270DataChunk(BMI270_FEAT_PAGE, &featpage, 1);
+}
+
+void bmi270StartReadingIntStatus0Reg(void)
+{
+  lastReadSize = 1;
+
+  // Use the global readBuffer to store the result
+  startReadBMI270Reg(BMI270_INT_STATUS_0, readBuffer, lastReadSize);
+
+}
+
+void bmi270StartReadingStepCounterData(void)
+{
+  lastReadSize = 4;
+
+  // Use the global readBuffer to store the result
+  startReadBMI270Reg(BMI270_FEAT_SC_OUT_ADDR, readBuffer, lastReadSize);
+
+}
+
+uint8_t getIntStatus0Value()
+{
+  return readBuffer[0];
+}
+
+uint32_t getStepCounterData()
+{
+  uint32_t stepCount = 0;
+
+      // Combine 4 bytes (Little Endian format)
+      stepCount =  (uint32_t)readBuffer[0];
+      stepCount |= ((uint32_t)readBuffer[1] << 8);
+      stepCount |= ((uint32_t)readBuffer[2] << 16);
+      stepCount |= ((uint32_t)readBuffer[3] << 24);
+
+      return stepCount;
+
 }
 
 
@@ -1167,7 +1219,7 @@ void mapStepCounterToInterrupt1()
 //    uint8_t mapdata =0x01;
 //    startWriteBMI270DataChunk(BMI270_INT1_MAP_FEAT, &mapdata, 1);
 
-  uint8_t mapdata =0x40;
+  uint8_t mapdata =0x02;
   startWriteBMI270DataChunk(BMI270_INT1_MAP_FEAT, &mapdata, 1);
 
 }

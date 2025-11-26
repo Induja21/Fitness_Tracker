@@ -35,8 +35,10 @@ typedef enum {
   BMI270_CHIP_ID_REG = 0x00,
   BMI270_ACC_X_LSB   = 0x0C,
   BMI270_GYR_X_LSB   = 0x12,
+  BMI270_INT_STATUS_0   = 0x1C,
   BMI270_INIT_STATUS = 0x21,
   BMI270_FEAT_PAGE = 0x2F,
+  BMI270_FEAT_SC_OUT_ADDR=0x30,
   BMI270_FEAT_STEP_COUNTER_ADDR=0x32,
   BMI270_FEAT_ANY_MOTION_ADDR=0x3C,
   BMI270_INT1_IO_CONTROL=0x53,
@@ -143,4 +145,8 @@ void mapStepCounterToInterrupt1();
 void configureInt1ToOutputEnable();
 void bmi270RestoreFeaturePage(void);
 void bmi270EnableODR();
+uint8_t getIntStatus0Value();
+uint32_t getStepCounterData();
+void bmi270StartReadingStepCounterData(void);
+void bmi270StartReadingIntStatus0Reg(void);
 #endif /* SRC_BMI270_H_ */

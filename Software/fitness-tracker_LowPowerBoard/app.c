@@ -282,8 +282,15 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
     }
   if((maxInitState==MAX32664_INIT_SUCCESSFUL) ||(maxInitState==MAX32664_INIT_FAILED))
     {
-      //Start with bmi270 initialization on success or failure scenario
-      bmi270StateMachine(evt);
+      if(getLatestBmi270InitState()!=BMI270_INIT_SUCCESSFUL)
+        {
+          //Start with bmi270 initialization on success or failure scenario
+          bmi270StateMachine(evt);
+        }
+      else
+        {
+          bmi270DataHandlingStateMachine(evt);
+        }
 
     }
 
