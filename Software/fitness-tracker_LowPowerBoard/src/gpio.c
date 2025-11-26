@@ -54,6 +54,10 @@
 #define TEMP_SENSOR_pin (15)  // Pin for temperature sensor
 #define DISP_EXT_COMIN_pin (13)
 
+#define BMI_INT1_PIN (6)
+#define MAX_MFIO_PIN (5)
+
+void gpioInterruptConfigure(void);
 /* -------------------------------------------------------------------------------------
  * gpioInit()
  * -------------------------------------------------------------------------------------
@@ -69,11 +73,12 @@ void gpioInit()
     // in a "Port" share the same drive strength setting.
     GPIO_DriveStrengthSet(SENSOR_port, gpioDriveStrengthWeakAlternateWeak); // Strong, 10mA
     GPIO_DriveStrengthSet(LED_port, gpioDriveStrengthWeakAlternateWeak); // Weak, 1mA
-
+    GPIO_DriveStrengthSet(gpioPortF,gpioDriveStrengthWeakAlternateWeak);
     // Set the GPIOs mode of operation
-    GPIO_PinModeSet(LED_port, LED0_pin, gpioModePushPull, false);
-    GPIO_PinModeSet(LED_port, LED1_pin, gpioModePushPull, false);
-    GPIO_PinModeSet(SENSOR_port, TEMP_SENSOR_pin, gpioModePushPull, false);
+   // GPIO_PinModeSet(LED_port, LED0_pin, gpioModePushPull, false);
+   // GPIO_PinModeSet(LED_port, LED1_pin, gpioModePushPull, false);
+   // GPIO_PinModeSet(SENSOR_port, TEMP_SENSOR_pin, gpioModePushPull, false);
+    gpioInterruptConfigure();
 }
 
 /* -------------------------------------------------------------------------------------
@@ -169,6 +174,28 @@ void gpioSetDisplayExtcomin(bool value)
   }
 }
 
+
+
+void gpioInterruptConfigure(void)
+{
+    // Configure BMI INT1 pin as input with filter (NO pull)
+    GPIO_PinModeSet(gpioPortF, BMI_INT1_PIN, gpioModeInputPullFilter, 0);
+
+    // Configure MFIO also as input with no pull
+    GPIO_PinModeSet(gpioPortF, MAX_MFIO_PIN, gpioModeInputPullFilter, 0);
+
+    // BMI INT1 → interrupt on RISING edge ONLY
+    GPIO_ExtIntConfig(gpioPortF, BMI_INT1_PIN, BMI_INT1_PIN, true, false, true);
+
+    // MFIO same config
+    GPIO_ExtIntConfig(gpioPortF, MAX_MFIO_PIN, MAX_MFIO_PIN, true, false, true);
+
+    // Clear IRQ flags and enable NVIC
+    NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
+    NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+    NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+    NVIC_EnableIRQ(GPIO_ODD_IRQn);
+}
 
 
 

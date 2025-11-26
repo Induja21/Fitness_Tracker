@@ -1071,11 +1071,19 @@ void startReadBMI270Reg(uint8_t reg, uint8_t *buffer, unsigned int len)
     NVIC_EnableIRQ(I2C0_IRQn);
 }
 
+void bmi270EnableODR()
+{
+
+  // 1) Configure Accelerometer ODR + Bandwidth
+  uint8_t acc_conf = 0x28; // ODR = 50Hz, Normal mode
+  startWriteBMI270DataChunk(0x40, &acc_conf, 1); // ACC_CONF register
+}
+
 void bmi270EnableAccel()
 {
-  uint8_t data = 0x04;//Bit2=1 to enable accel
-  startWriteBMI270DataChunk(BMI270_PWR_CTRL_REG, &data, 1);
 
+  uint8_t data = 0x05;//Bit2=1 to enable accel
+  startWriteBMI270DataChunk(BMI270_PWR_CTRL_REG, &data, 1);
 }
 
 void waitForAccelEnable()
@@ -1085,7 +1093,11 @@ void waitForAccelEnable()
 
 void startStepCounterEnable()
 {
-  uint8_t featpage=FEAT_PAGE_NUM_FOR_STEP_OP;
+//  uint8_t featpage=FEAT_PAGE_NUM_FOR_STEP_OP;
+//  //First select the feature page which has step counter feature
+//  startWriteBMI270DataChunk(BMI270_FEAT_PAGE, &featpage, 1);
+
+  uint8_t featpage=0x01;
   //First select the feature page which has step counter feature
   startWriteBMI270DataChunk(BMI270_FEAT_PAGE, &featpage, 1);
 
@@ -1102,21 +1114,38 @@ void readSelectedFeaturePage()
 
 void enableStepOpAndWriteToFeaturePage()
 {
-    uint16_t sc26Value = (readBuffer[1]<<8) | readBuffer[0];
-    // Enable Step Counter and enable step detector
-    //sc26Value |= (1<<STEP_COUNTER_RESET_POS);
-    sc26Value |= (1<<STEP_DETECTOR_BIT_POS);
-    sc26Value |= (1<<STEP_COUNTER_BIT_POS);
-    //Clear the water mark level bits
-    sc26Value &= ~(WATERMARK_LEVEL_MASK);
-    //Water mark level
-    uint16_t watermarkLevel = SET_WATERMARK_LEVEL&WATERMARK_LEVEL_MASK;
-    sc26Value |= watermarkLevel;
-    uint8_t bufferData[2];
-    bufferData[0]=sc26Value&0xFF;
-    bufferData[1]=(sc26Value >> 8) & 0xFF;
-    //Write back to that page
-    startWriteBMI270DataChunk(BMI270_FEAT_STEP_COUNTER_ADDR,bufferData,2);
+//    uint16_t sc26Value = (readBuffer[1]<<8) | readBuffer[0];
+//    // Enable Step Counter and enable step detector
+//    //sc26Value |= (1<<STEP_COUNTER_RESET_POS);
+//    sc26Value |= (1<<STEP_DETECTOR_BIT_POS);
+//    sc26Value |= (1<<STEP_COUNTER_BIT_POS);
+//    //Clear the water mark level bits
+//    sc26Value &= ~(WATERMARK_LEVEL_MASK);
+//    //Water mark level
+//    uint16_t watermarkLevel = SET_WATERMARK_LEVEL&WATERMARK_LEVEL_MASK;
+//    sc26Value |= watermarkLevel;
+//    uint8_t bufferData[2];
+//    bufferData[0]=sc26Value&0xFF;
+//    bufferData[1]=(sc26Value >> 8) & 0xFF;
+//    //Write back to that page
+//    startWriteBMI270DataChunk(BMI270_FEAT_STEP_COUNTER_ADDR,bufferData,2);
+
+
+  uint8_t anymotion_cfg[4];
+
+  anymotion_cfg[0] = 0x02;
+  anymotion_cfg[1] = 0xE0;
+  anymotion_cfg[2] = 0x0A;
+  anymotion_cfg[3] = 0xB8;
+
+  startWriteBMI270DataChunk(BMI270_FEAT_ANY_MOTION_ADDR, anymotion_cfg, 4);
+
+}
+
+void bmi270RestoreFeaturePage(void)
+{
+    uint8_t featpage = 0x00;   // Default feature page
+    startWriteBMI270DataChunk(BMI270_FEAT_PAGE, &featpage, 1);
 }
 
 
@@ -1135,8 +1164,11 @@ void resetStepCounterAndWriteToFeaturePage()
 
 void mapStepCounterToInterrupt1()
 {
-    uint8_t mapdata =0x01;
-    startWriteBMI270DataChunk(BMI270_INT1_MAP_FEAT, &mapdata, 1);
+//    uint8_t mapdata =0x01;
+//    startWriteBMI270DataChunk(BMI270_INT1_MAP_FEAT, &mapdata, 1);
+
+  uint8_t mapdata =0x40;
+  startWriteBMI270DataChunk(BMI270_INT1_MAP_FEAT, &mapdata, 1);
 
 }
 

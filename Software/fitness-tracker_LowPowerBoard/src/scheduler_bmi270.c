@@ -36,11 +36,14 @@ typedef enum bmi270InitOperationState {
     BMI270_WAIT_BEFORE_INIT_CTRL,
     BMI270_SET_INIT_CTRL_1,
     BMI270_WAIT_INIT_CTRL_1,
-    BMI270_CHECK_INIT_STATUS,BMI270_START_ACCEL_ENABLE,
+    BMI270_CHECK_INIT_STATUS,
+    BMI270_ENABLE_ODR,
+    BMI270_START_ACCEL_ENABLE,
     BMI270_WAIT_FOR_ACCEL_ENABLE,
     BMI270_START_STEPCOUNTER_ENABLE,
     BMI270_READ_SELECTED_FEATURE_RANGE,
     BMI270_ENABLE_STEP_OP,
+    BMI270_RESTORE_FEAT_PAGE0,
     BMI270_MAP_STEP_COUNTER_TO_INTERRUPT,
     BMI270_CONFIG_INT1,
     BMI270_STATE_INIT_COMPLETE
@@ -66,6 +69,7 @@ static bmi270InitStatus_e bmi270InitStatus = BMI270_INIT_IDLE;
 void bmi270StateMachine(sl_bt_msg_t *bleEvent)
 {
   allEvents_t event = INVALID_EVENT;
+  static dummyCounter=0;
    switch (SL_BT_MSG_ID(bleEvent->header)) {
      case sl_bt_evt_connection_opened_id:
          break;
@@ -235,8 +239,8 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
               case BMI270_CHECK_INIT_STATUS:
                 if(event == I2C_TRANSFER_EVENT) {
                   if(isBMI270InitSuccessful()) {
-                      currentInitStateMachineState=BMI270_START_ACCEL_ENABLE;
-                      bmi270EnableAccel();
+                      currentInitStateMachineState=BMI270_ENABLE_ODR;
+                      bmi270EnableODR();
 
                   } else {
                       bmi270InitStatus = BMI270_INIT_FAILED;
@@ -244,6 +248,12 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
                   }
                 }
                   break;
+              case BMI270_ENABLE_ODR:
+                if(event == I2C_TRANSFER_EVENT) {
+                    currentInitStateMachineState=BMI270_START_ACCEL_ENABLE;
+                    bmi270EnableAccel();
+                }
+                break;
               case BMI270_START_ACCEL_ENABLE:
                 if(event == I2C_TRANSFER_EVENT) {
                     currentInitStateMachineState=BMI270_WAIT_FOR_ACCEL_ENABLE;
@@ -271,8 +281,18 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
                 break;
 
               case BMI270_ENABLE_STEP_OP:
-                if(event == I2C_TRANSFER_EVENT) {
-                    currentInitStateMachineState=BMI270_MAP_STEP_COUNTER_TO_INTERRUPT;
+                if (event == I2C_TRANSFER_EVENT) {
+                    // Step feature configuration has been written on page 6.
+                    // Now restore FEAT_PAGE back to 0 to avoid side effects on later accesses.
+                    currentInitStateMachineState = BMI270_RESTORE_FEAT_PAGE0;
+                    bmi270RestoreFeaturePage();
+                }
+                break;
+
+              case BMI270_RESTORE_FEAT_PAGE0:
+                if (event == I2C_TRANSFER_EVENT) {
+                    // Now that FEAT_PAGE is back to 0, map the step counter interrupt.
+                    currentInitStateMachineState = BMI270_MAP_STEP_COUNTER_TO_INTERRUPT;
                     mapStepCounterToInterrupt1();
                 }
                 break;
@@ -288,7 +308,15 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
                     bmi270InitStatus = BMI270_INIT_SUCCESSFUL;
                 }
                 break;
-
+//              case BMI270_STATE_INIT_COMPLETE:
+//                {
+//                  if(event == I2C_TRANSFER_EVENT)
+//                    {
+//
+//                    }
+//
+//                }
+//                break;
               default:
                   break;
           }
