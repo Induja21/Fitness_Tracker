@@ -158,12 +158,16 @@ void schedulerSetEventPF5(void)
   // Clear the interrupt flag
   uint32_t flags = GPIO_IntGet();
   GPIO_IntClear(flags);
+
+;
   // Enter critical section
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
   // Check if PF5 triggered the interrupt (interrupt source 5)
   if (flags & (1 << 5)) {
     sl_bt_external_signal(MAX_MFIO_INTERRUPT);
+    GPIO_IntClear(1 << 5);
+    NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
   }
   // Exit critical section
   CORE_EXIT_CRITICAL();

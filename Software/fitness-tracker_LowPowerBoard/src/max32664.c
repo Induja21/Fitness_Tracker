@@ -298,15 +298,15 @@ void max32664ConfigInterrupts()
 void max32664ReadFirstTime()
 {
 
-  if (GPIO_PinInGet(gpioPortF, MAX_MFIO_PIN) == 0)
-  {
+//  if (GPIO_PinInGet(gpioPortF, MAX_MFIO_PIN) == 0)
+//  {
 
       lastReadSize = 5;
 
       // Read processed algorithm output sample (FIFO one sample)
       // Family: 0x12, Index: 0x01
       startReadBioSensorReg(0x12, 0x01, readResponse, lastReadSize);
-  }
+  //}
 
 
 }

@@ -42,6 +42,7 @@ typedef enum max32664InitOperationState
     MAX32664_ENABLE_SENSOR,
     MAX32664_WAIT_FOR_SENSOR_TO_ENABLE,
     MAX32664_ENABLE_AGC_ALGORITHM,
+    MAX32664_READ_FIRST_TIME,
     MAX32664_WAIT_FOR_AGC_ENABLE,
     MAX32664_ENABLE_WEARABLE_SUITE,
     MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE,
@@ -206,33 +207,33 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                 }
             }
             break;
-//          case MAX32664_WAIT_FOR_ALGO_MODE_SELECTION:
-//            {
-//              if(event==COMP1_EVENT)
-//                {
-//
-//                  currentInitStateMachineState=MAX32664_SET_THRESHOLD_VALUE;
-//                  setThresholdData(200);
-//
-//
-//                }
-//            }
-//            break;
-//
-//          case MAX32664_SET_THRESHOLD_VALUE:
-//            {
-//              if(event==I2C_TRANSFER_EVENT)
-//                {
-//                  currentInitStateMachineState=MAX32664_WAIT_TO_SET_THRESHOLD_DATA;
-//                  waitToSetThresholdData();
-//                }
-//            }
-//            break;
           case MAX32664_WAIT_FOR_ALGO_MODE_SELECTION:
+            {
+              if(event==COMP1_EVENT)
+                {
+
+                  currentInitStateMachineState=MAX32664_SET_THRESHOLD_VALUE;
+                  setThresholdData(0xFF);
+
+
+                }
+            }
+            break;
+
+          case MAX32664_SET_THRESHOLD_VALUE:
+            {
+              if(event==I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_WAIT_TO_SET_THRESHOLD_DATA;
+                  waitToSetThresholdData();
+                }
+            }
+            break;
+          case MAX32664_WAIT_TO_SET_THRESHOLD_DATA:
             if(event==COMP1_EVENT)
               {
                 currentInitStateMachineState=MAX32664_SET_REPORT_PERIOD_VALUE;
-                max32664SetReportPeriod(125);
+                max32664SetReportPeriod(20);
               }
             break;
 
@@ -240,22 +241,14 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
             {
               if(event==I2C_TRANSFER_EVENT)
                 {
-                  currentInitStateMachineState=MAX32664_ENABLE_SENSOR;
-                  enableSensor();
+                  currentInitStateMachineState=MAX32664_READ_FIRST_TIME;
+                  max32664ReadFirstTime();
                 }
             }
             break;
 
-          case MAX32664_ENABLE_SENSOR:
+          case MAX32664_READ_FIRST_TIME:
             if(event == I2C_TRANSFER_EVENT)
-              {
-                currentInitStateMachineState=MAX32664_WAIT_FOR_SENSOR_TO_ENABLE;
-                waitForSensorToEnable();
-
-              }
-            break;
-          case MAX32664_WAIT_FOR_SENSOR_TO_ENABLE:
-            if(event == COMP1_EVENT)
               {
                 currentInitStateMachineState=MAX32664_ENABLE_AGC_ALGORITHM;
                 enableAGCAlgorithm();
@@ -344,15 +337,31 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
               if(event==I2C_TRANSFER_EVENT)
                 {
                   max32664ConfigInterrupts();
-                  currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
-                  max32664CurrentInitState= MAX32664_INIT_SUCCESSFUL;
+                  currentInitStateMachineState=MAX32664_ENABLE_SENSOR;
+                  enableSensor();
+                  //max32664CurrentInitState= MAX32664_INIT_SUCCESSFUL;
 
                 }
             }
 
 
             break;
+          case  MAX32664_ENABLE_SENSOR:
+            {
+              if(event == I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_SENSOR_TO_ENABLE;
+                  waitForSensorToEnable();
+                }
 
+            }
+            break;
+          case MAX32664_WAIT_FOR_SENSOR_TO_ENABLE:
+            if(event == COMP1_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
+              }
+            break;
           case MAX32664_WAIT_FOR_INTERRUPT:
             {
               if(event==MAX_MFIO_EVENT)
