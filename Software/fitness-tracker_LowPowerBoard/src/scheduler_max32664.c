@@ -47,6 +47,11 @@ typedef enum max32664InitOperationState
     MAX32664_ENABLE_BPT_ALGO,
     MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE,
     MAX32664_WAIT_FOR_INTERRUPT,
+    MAX32664_START_GET_NO_OF_FIFO_BYTES,
+    MAX32664_WAIT_GET_NO_OF_FIFO_BYTES,
+    MAX32664_START_PERFORM_FIFO_READ,
+    MAX32664_WAIT_FOR_FIFO_READ,
+    MAX32664_PERFORM_FIFO_READ,
     MAX32664_READ_STATUS_BYTE,
     MAX32664_GET_NO_OF_FIFO_BYTES,
     MAX32664_PERFORM_READ,
@@ -74,7 +79,7 @@ static max32664InitOperationState_e currentInitStateMachineState = MAX32664_STAR
 static max32664InitState_e max32664CurrentInitState = MAX32664_INIT_IDLE;
 static void sendIndicationsOfMax32664version(uint8_t version);
 
-
+static uint8_t noOfFiFoBytes=0;
 void max32664StateMachine(sl_bt_msg_t *bleEvent)
 {
   allEvents_t event = INVALID_EVENT;
@@ -358,8 +363,8 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                   uint8_t statusByte = getStatusByte();
                   if(IS_BIT_SET(statusByte,3)==1 || count<=1)
                     {
-                      currentInitStateMachineState=MAX32664_GET_NO_OF_FIFO_BYTES;
-                      readNoOfSamplesinFiFo();
+                      currentInitStateMachineState=MAX32664_START_GET_NO_OF_FIFO_BYTES;
+                      startreadNoOfSamplesinFiFo();
                       count++;
                     }
                   else
@@ -371,18 +376,58 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                 }
             }
             break;
-          case MAX32664_GET_NO_OF_FIFO_BYTES:
+          case MAX32664_START_GET_NO_OF_FIFO_BYTES:
             {
-              if(event == I2C_TRANSFER_EVENT)
+              if(event==I2C_TRANSFER_EVENT)
                 {
-                  uint8_t noOfFiFoBytes = getNoOfSamplescurrentlyAvailableInFifo();
-                  currentInitStateMachineState=MAX32664_PERFORM_DUMMY_READ;
-                  performSensorRead(noOfFiFoBytes*23);
+                  currentInitStateMachineState=MAX32664_WAIT_GET_NO_OF_FIFO_BYTES;
+                  i2cDelayForReadOperation();
                 }
 
             }
             break;
-          case MAX32664_PERFORM_DUMMY_READ:
+          case MAX32664_WAIT_GET_NO_OF_FIFO_BYTES:
+            {
+              if(event==COMP1_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_GET_NO_OF_FIFO_BYTES;
+                  performReadOfNofSamplesInFiFo();
+                }
+            }
+            break;
+          case MAX32664_GET_NO_OF_FIFO_BYTES:
+            {
+              if(event == I2C_TRANSFER_EVENT)
+                {
+                  noOfFiFoBytes = getNoOfSamplescurrentlyAvailableInFifo();
+                  currentInitStateMachineState=MAX32664_START_PERFORM_FIFO_READ;
+                  startperformSensorRead();
+                }
+
+            }
+            break;
+          case MAX32664_START_PERFORM_FIFO_READ:
+            {
+              if(event==I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_FIFO_READ;
+                  i2cDelayForReadOperation();
+                }
+            }
+            break;
+          case MAX32664_WAIT_FOR_FIFO_READ:
+            {
+              if(event==COMP1_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_PERFORM_FIFO_READ;
+                  performSensorReadOperation(noOfFiFoBytes*23);
+                }
+
+            }
+
+            break;
+
+          case MAX32664_PERFORM_FIFO_READ:
             {
               if(event==I2C_TRANSFER_EVENT)
                 {

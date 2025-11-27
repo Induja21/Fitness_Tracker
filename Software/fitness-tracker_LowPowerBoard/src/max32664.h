@@ -151,7 +151,11 @@ void parseAlgoData(void);
 void waitForInitComplete();
 void readNoOfSamplesinFiFo();
 uint8_t getNoOfSamplescurrentlyAvailableInFifo();
-void performSensorRead(uint8_t readSize);
+void startperformSensorRead();
+void performSensorReadOperation(uint8_t readSize);
+void performReadOfNofSamplesInFiFo();
+void startreadNoOfSamplesinFiFo();
+void i2cDelayForReadOperation();
 void readStatusByte();
 uint8_t getStatusByte();
 #endif /* SRC_MAX32664_H_ */
