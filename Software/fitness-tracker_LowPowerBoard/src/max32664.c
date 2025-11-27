@@ -9,7 +9,7 @@
 #define CMD_DELAY_IN_US 60000
 
 
-uint8_t readResponse[16];
+uint8_t readResponse[256];
 uint8_t lastReadSize=0;
 I2C_TransferSeq_TypeDef i2cTransfer;
 
@@ -100,6 +100,26 @@ static I2C_TransferReturn_TypeDef startReadBioSensorReg( uint8_t command, uint8_
     return transferStatus;
 }
 
+static I2C_TransferReturn_TypeDef startReadBioSensorRegSpl( uint8_t command, uint8_t index, uint8_t *data, uint8_t len)
+{
+    uint8_t cmd[3] = {0xAA, command, index };
+
+    i2cTransfer.addr = max32664_hub.device.i2c_cfg.address << 1;
+    i2cTransfer.flags = I2C_FLAG_WRITE_READ;
+    i2cTransfer.buf[0].data = cmd;
+    i2cTransfer.buf[0].len = 3;
+    i2cTransfer.buf[1].data = data;
+    i2cTransfer.buf[1].len = len + 1; // +1 for status byte
+
+    I2C_TransferReturn_TypeDef transferStatus = I2C_TransferInit(max32664_hub.device.i2c_cfg.i2c_port, &i2cTransfer);
+    if (transferStatus < 0) {
+        //LOG_ERROR("I2C_TransferInit() Read error = %d", transferStatus);
+    }
+    I2C_IntEnable(I2C0, I2C_IEN_MSTOP);
+    NVIC_EnableIRQ(I2C0_IRQn);
+    return transferStatus;
+}
+
 
 static I2C_TransferReturn_TypeDef startWriteBioSensorReg(uint8_t command,
                                                          uint8_t index,
@@ -159,7 +179,7 @@ void waitForDeviceModeSelection()
 
 void selectAlgoMode()
 {
-  uint8_t algoMode = 0x01;
+  uint8_t algoMode = 0x03;
   startWriteBioSensorReg(OUTPUT_MODE, 0, &algoMode, 1);
 }
 
@@ -200,21 +220,21 @@ void enableAGCAlgorithm()
 
 void waitForAGCAlgoToEnable()
 {
-  timerWaitUs_interrupt(50000);
+  timerWaitUs_interrupt(30000);
 }
-void enableWearableAlgoSuite()
+void enableBPTAlgoSuite()
 {
   // FAMILY = 0x52 (Algorithm)
-  // INDEX  = 0x07 (Wearable Suite WHRM + WSpO2)
-  // VALUE  = 0x01 (Enable Mode 1)
-  uint8_t wearable = 0x01;
-  startWriteBioSensorReg(0x52, 0x07, &wearable, 1);
+  // INDEX  = 0x04 (Wearable Suite WHRM + WSpO2)
+  // VALUE  = 0x02 (Enable Mode 1)
+  uint8_t estimationMode = 0x02;
+  startWriteBioSensorReg(0x52, 0x04, &estimationMode, 1);
 
 }
 
-void waitForWearableAlgoSuiteToEnable()
+void waitForBPTAlgoSuiteToEnable()
 {
-  timerWaitUs_interrupt(120000);
+  timerWaitUs_interrupt(40000);
 }
 
 void waitForInitComplete()
@@ -310,11 +330,38 @@ void max32664ReadFirstTime()
 
 
 }
+void readNoOfSamplesinFiFo()
+{
+  lastReadSize=2;
+  startReadBioSensorReg(0x12, 0x00, readResponse, lastReadSize);
+}
 
-void performSensorRead()
+uint8_t getNoOfSamplescurrentlyAvailableInFifo()
+{
+   if(readResponse[0]==0)
+     {
+       return readResponse[1];
+     }
+
+}
+
+void readStatusByte()
+{
+  lastReadSize=2;
+  startReadBioSensorReg(0x00, 0x00, readResponse, lastReadSize);
+}
+
+uint8_t getStatusByte()
+{
+  if(readResponse[0]==0)
+    {
+      return readResponse[1];
+    }
+}
+void performSensorRead(uint8_t readSize)
 {
 
-      lastReadSize = 5;
+      lastReadSize = readSize;
 
       // Read processed algorithm output sample (FIFO one sample)
       // Family: 0x12, Index: 0x01
@@ -328,12 +375,14 @@ bool checkIfDataIsValid()
 }
 void parseAlgoData(void)
 {
-    // parse only if 6 bytes are received:
-    maxData.heartRate  = ((uint16_t)readResponse[1] << 8) | readResponse[2];
-    maxData.confidence = readResponse[3];
-    maxData.spo2       = readResponse[4];
-    maxData.status     = readResponse[5];
+    // Parse BPT algorithm data from FIFO sample (bytes 12+ of 23-byte sample)
+    // Assumes readResponse contains full 23-byte FIFO sample
+    maxData.heartRate  = ((uint16_t)readResponse[14] << 8) | readResponse[15];  // Bytes 14-15: 10x HR (MSB first)
+    maxData.confidence = readResponse[13];                                      // Byte 13: Progress % (confidence)
+    maxData.spo2       = ((uint16_t)readResponse[18] << 8) | readResponse[19]; // Bytes 18-19: 10x SpO2 (MSB first)
+    maxData.status     = readResponse[12];                                      // Byte 12: BP status
 }
+
 
 void max32664SetReportPeriod(uint8_t reportPeriodValue)
 {

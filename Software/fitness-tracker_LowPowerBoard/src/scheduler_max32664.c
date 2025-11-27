@@ -44,9 +44,11 @@ typedef enum max32664InitOperationState
     MAX32664_ENABLE_AGC_ALGORITHM,
     MAX32664_READ_FIRST_TIME,
     MAX32664_WAIT_FOR_AGC_ENABLE,
-    MAX32664_ENABLE_WEARABLE_SUITE,
+    MAX32664_ENABLE_BPT_ALGO,
     MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE,
     MAX32664_WAIT_FOR_INTERRUPT,
+    MAX32664_READ_STATUS_BYTE,
+    MAX32664_GET_NO_OF_FIFO_BYTES,
     MAX32664_PERFORM_READ,
     MAX32664_STATE_HUB_VERSION_READ,
     MAX32664_STATE_HUB_VERSION_READ_COMPLETE,
@@ -67,7 +69,7 @@ typedef enum max32664InitOperationState
 
 
 
-
+#define IS_BIT_SET(byte,pos) ((byte>>pos)&1)
 static max32664InitOperationState_e currentInitStateMachineState = MAX32664_START_APP_MODE_OPERATION;
 static max32664InitState_e max32664CurrentInitState = MAX32664_INIT_IDLE;
 static void sendIndicationsOfMax32664version(uint8_t version);
@@ -76,6 +78,7 @@ static void sendIndicationsOfMax32664version(uint8_t version);
 void max32664StateMachine(sl_bt_msg_t *bleEvent)
 {
   allEvents_t event = INVALID_EVENT;
+  static uint8_t count=0;
   switch (SL_BT_MSG_ID(bleEvent->header)) {
     case sl_bt_evt_connection_opened_id:
         break;
@@ -182,8 +185,8 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                   uint8_t buffsize= getLastReadBuffer(&dataRead);
                   if((buffsize==2) && (dataRead[0]==0x00) && (dataRead[1]==0x00))
                   {
-                    currentInitStateMachineState=MAX32664_SELECT_ALGO_MODE;
-                    selectAlgoMode();
+                    currentInitStateMachineState = MAX32664_STATE_HUB_VERSION_READ;
+                    readSensorHubVersion();
 
                   }
               }
@@ -197,6 +200,34 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
 
               }
           break;
+          case MAX32664_STATE_HUB_VERSION_READ:
+          {
+            if(event==I2C_TRANSFER_EVENT)
+            {
+            const uint8_t* dataRead = NULL;
+            uint8_t buffsize= getLastReadBuffer(&dataRead);
+            if(buffsize==4)
+            {
+                 //Check If valid version
+               if(!isAValidHubVersion())
+               {
+                   max32664CurrentInitState = MAX32664_INIT_FAILED;
+                 // Failed, reset state machine
+                 currentInitStateMachineState=MAX32664_START_APP_MODE_OPERATION;
+               }
+               else
+               {
+                   currentInitStateMachineState=MAX32664_SELECT_ALGO_MODE;
+
+                   float version = getHubVersion();
+                   selectAlgoMode();
+               }
+
+
+             }
+           }
+          }
+        break;
 
           case  MAX32664_SELECT_ALGO_MODE:
             {
@@ -213,7 +244,7 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                 {
 
                   currentInitStateMachineState=MAX32664_SET_THRESHOLD_VALUE;
-                  setThresholdData(0xFF);
+                  setThresholdData(0x0F);
 
 
                 }
@@ -232,24 +263,6 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
           case MAX32664_WAIT_TO_SET_THRESHOLD_DATA:
             if(event==COMP1_EVENT)
               {
-                currentInitStateMachineState=MAX32664_SET_REPORT_PERIOD_VALUE;
-                max32664SetReportPeriod(20);
-              }
-            break;
-
-          case MAX32664_SET_REPORT_PERIOD_VALUE:
-            {
-              if(event==I2C_TRANSFER_EVENT)
-                {
-                  currentInitStateMachineState=MAX32664_READ_FIRST_TIME;
-                  max32664ReadFirstTime();
-                }
-            }
-            break;
-
-          case MAX32664_READ_FIRST_TIME:
-            if(event == I2C_TRANSFER_EVENT)
-              {
                 currentInitStateMachineState=MAX32664_ENABLE_AGC_ALGORITHM;
                 enableAGCAlgorithm();
               }
@@ -261,21 +274,58 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                 waitForAGCAlgoToEnable();
               }
             break;
+
+//          case MAX32664_WAIT_FOR_AGC_ENABLE:
+//            if(event==COMP1_EVENT)
+//              {
+//                currentInitStateMachineState=MAX32664_ENABLE_WEARABLE_SUITE;
+//                enableWearableAlgoSuite();
+//              }
+//            break;
+//          case MAX32664_ENABLE_WEARABLE_SUITE:
+//            {
+//            if(event == I2C_TRANSFER_EVENT)
+//              {
+//                currentInitStateMachineState=MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE;
+//                waitForWearableAlgoSuiteToEnable();
+//              }
+//            }
+//            break;
           case MAX32664_WAIT_FOR_AGC_ENABLE:
-            if(event==COMP1_EVENT)
-              {
-                currentInitStateMachineState=MAX32664_ENABLE_WEARABLE_SUITE;
-                enableWearableAlgoSuite();
-              }
-            break;
-          case MAX32664_ENABLE_WEARABLE_SUITE:
             {
-            if(event == I2C_TRANSFER_EVENT)
+            if(event == COMP1_EVENT)
               {
-                currentInitStateMachineState=MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE;
-                waitForWearableAlgoSuiteToEnable();
+                currentInitStateMachineState=MAX32664_ENABLE_SENSOR;
+                max32664ConfigInterrupts();
+                enableSensor();
               }
             }
+            break;
+          case MAX32664_ENABLE_SENSOR:
+            {
+              if(event == I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_SENSOR_TO_ENABLE;
+                  waitForSensorToEnable();
+                }
+            }
+            break;
+          case MAX32664_WAIT_FOR_SENSOR_TO_ENABLE:
+            {
+              if(event == COMP1_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_ENABLE_BPT_ALGO;
+                  enableBPTAlgoSuite();
+                }
+            }
+            break;
+          case MAX32664_ENABLE_BPT_ALGO:
+            if(event==I2C_TRANSFER_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE;
+                waitForBPTAlgoSuiteToEnable();
+
+              }
             break;
           case MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE:
             {
@@ -292,97 +342,69 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
             {
               if(event == COMP1_EVENT)
                 {
-                  currentInitStateMachineState = MAX32664_STATE_HUB_VERSION_READ;
-                  readSensorHubVersion();
+                  currentInitStateMachineState=MAX32664_READ_STATUS_BYTE;
+                  readStatusByte();
+
 
                 }
 
             }
             break;
-          case MAX32664_STATE_HUB_VERSION_READ:
+          case MAX32664_READ_STATUS_BYTE:
             {
-              if(event==I2C_TRANSFER_EVENT)
-              {
-              const uint8_t* dataRead = NULL;
-              uint8_t buffsize= getLastReadBuffer(&dataRead);
-              if(buffsize==4)
-              {
-                   //Check If valid version
-                 if(!isAValidHubVersion())
-                 {
-                     sendIndicationsOfMax32664version(28);
-                     max32664CurrentInitState = MAX32664_INIT_FAILED;
-                   // Failed, reset state machine
-                   currentInitStateMachineState=MAX32664_START_APP_MODE_OPERATION;
-                 }
-                 else
-                 {
-                     currentInitStateMachineState=MAX32664_PERFORM_DUMMY_READ;
+              if(event == I2C_TRANSFER_EVENT)
+                {
+                  //Get the status byte
+                  uint8_t statusByte = getStatusByte();
+                  if(IS_BIT_SET(statusByte,3)==1 || count<=1)
+                    {
+                      currentInitStateMachineState=MAX32664_GET_NO_OF_FIFO_BYTES;
+                      readNoOfSamplesinFiFo();
+                      count++;
+                    }
+                  else
+                    {
+                      currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
 
-                     float version = getHubVersion();
-                     max32664ReadFirstTime();
-                     //gpioMaxMFIOInterruptConfigure();
+                    }
 
-                     //sendIndicationsOfMax32664version(23);
-                     //sendIndicationsOfMax32664version(version);
-                 }
-
-
-               }
-             }
+                }
             }
-          break;
+            break;
+          case MAX32664_GET_NO_OF_FIFO_BYTES:
+            {
+              if(event == I2C_TRANSFER_EVENT)
+                {
+                  uint8_t noOfFiFoBytes = getNoOfSamplescurrentlyAvailableInFifo();
+                  currentInitStateMachineState=MAX32664_PERFORM_DUMMY_READ;
+                  performSensorRead(noOfFiFoBytes*23);
+                }
+
+            }
+            break;
           case MAX32664_PERFORM_DUMMY_READ:
             {
               if(event==I2C_TRANSFER_EVENT)
                 {
-                  max32664ConfigInterrupts();
-                  currentInitStateMachineState=MAX32664_ENABLE_SENSOR;
-                  enableSensor();
-                  //max32664CurrentInitState= MAX32664_INIT_SUCCESSFUL;
-
-                }
-            }
-
-
-            break;
-          case  MAX32664_ENABLE_SENSOR:
-            {
-              if(event == I2C_TRANSFER_EVENT)
-                {
-                  currentInitStateMachineState=MAX32664_WAIT_FOR_SENSOR_TO_ENABLE;
-                  waitForSensorToEnable();
+                  parseAlgoData();
+                  checkIfDataIsValid();
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
                 }
 
             }
             break;
-          case MAX32664_WAIT_FOR_SENSOR_TO_ENABLE:
-            if(event == COMP1_EVENT)
-              {
-                currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
-              }
-            break;
+
           case MAX32664_WAIT_FOR_INTERRUPT:
             {
               if(event==MAX_MFIO_EVENT)
                 {
-                  currentInitStateMachineState=MAX32664_PERFORM_READ;
-                  performSensorRead();
+                  currentInitStateMachineState=MAX32664_READ_STATUS_BYTE;
+                  readStatusByte();
                 }
             }
 
             break;
-          case MAX32664_PERFORM_READ:
-            {
-              if(event== I2C_TRANSFER_EVENT)
-                {
-                  currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
-                  parseAlgoData();
-                  checkIfDataIsValid();
-                }
 
-            }
-            break;
 
           default:
             break;
