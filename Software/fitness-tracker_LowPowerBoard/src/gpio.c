@@ -192,10 +192,10 @@ void gpioInterruptConfigure(void)
 
     // Clear IRQ flags and enable NVIC
     NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
-    NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
     NVIC_EnableIRQ(GPIO_EVEN_IRQn);
-    NVIC_EnableIRQ(GPIO_ODD_IRQn);
 }
+
+
 
 
 

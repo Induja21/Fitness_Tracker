@@ -53,7 +53,6 @@ typedef struct stateMachine{
 }stateMachine_t;
 
 
-static stateMachine_t stateMachine = {TEMP_STATE_IDLE, 0.0};
 
 /* -------------------------------------------------------------------------------------
  * Global Variables
@@ -186,19 +185,6 @@ void schedulerSetEventPF6(void)
   CORE_EXIT_CRITICAL();
 }
 
-/* -------------------------------------------------------------------------------------
- * resetStateMachine
- * ------------------------------------------------------------------------------------
- * @Purpose : This function resets the state machine by setting the current state
- *            to TEMP_STATE_IDLE. This ensures that the system starts from a known
- *            idle state before processing further state transitions.
- * @Param   : None
- * @Return  : None
- *-------------------------------------------------------------------------------------*/
-static void resetStateMachine(void)
-{
-  stateMachine.currentState = TEMP_STATE_IDLE;
-}
 
 
 

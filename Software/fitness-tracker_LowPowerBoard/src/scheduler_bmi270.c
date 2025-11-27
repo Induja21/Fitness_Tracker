@@ -72,7 +72,6 @@ static bmi270InitStatus_e bmi270InitStatus = BMI270_INIT_IDLE;
 void bmi270StateMachine(sl_bt_msg_t *bleEvent)
 {
   allEvents_t event = INVALID_EVENT;
-  static dummyCounter=0;
    switch (SL_BT_MSG_ID(bleEvent->header)) {
      case sl_bt_evt_connection_opened_id:
          break;
@@ -421,7 +420,7 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
          case BMI270_READ_BMI_INT_STATUS_REG:
            if(event==I2C_TRANSFER_EVENT)
            {
-               uint8_t intStatusRegistrer0 = getIntStatus0Value();
+               getIntStatus0Value();
                currentDataHandlingStateMachineState=BMI270_READ_STEP_COUNTER_DATA;
                bmi270StartReadingStepCounterData();
            }

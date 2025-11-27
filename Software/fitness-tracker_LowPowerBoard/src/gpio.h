@@ -103,7 +103,7 @@ void gpioTempSensorOn(void);
 
 void gpioSetDisplayExtcomin(bool value);
 
-
+void gpioMaxMFIOInterruptConfigure(void);
 
 
 #endif /* SRC_GPIO_H_ */

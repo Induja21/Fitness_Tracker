@@ -10,6 +10,7 @@
 #include "scheduler_max32664.h"
 #include "max32664.h"
 #include "ble.h"
+#include "gpio.h"
 
 
 
@@ -29,11 +30,28 @@ typedef enum max32664InitOperationState
     MAX32664_START_APP_MODE_OPERATION,
     MAX32664_STATE_CLEAR_RESET_PIN,
     MAX32664_STATE_SET_RESET_PIN,
+    MAX32664_SELECT_DEVICE_MODE,
+    MAX32664_WAIT_FOR_DEVICE_MODE_SELECTION,
+    MAX32664_SELECT_ALGO_MODE,
+    MAX32664_WAIT_FOR_ALGO_MODE_SELECTION,
     MAX32664_STATE_APP_READ,
     MAX32664_STATE_APP_COMPLETE,
+    MAX32664_SET_THRESHOLD_VALUE,
+    MAX32664_WAIT_TO_SET_THRESHOLD_DATA,
+    MAX32664_SET_REPORT_PERIOD_VALUE,
+    MAX32664_ENABLE_SENSOR,
+    MAX32664_WAIT_FOR_SENSOR_TO_ENABLE,
+    MAX32664_ENABLE_AGC_ALGORITHM,
+    MAX32664_WAIT_FOR_AGC_ENABLE,
+    MAX32664_ENABLE_WEARABLE_SUITE,
+    MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE,
+    MAX32664_WAIT_FOR_INTERRUPT,
+    MAX32664_PERFORM_READ,
     MAX32664_STATE_HUB_VERSION_READ,
     MAX32664_STATE_HUB_VERSION_READ_COMPLETE,
+    MAX32664_WAIT_FOR_INIT_TO_COMPLETE,
     MAX32664_STATE_CONVERSION_COMPLETE,
+    MAX32664_PERFORM_DUMMY_READ,
     MAX32664_STATE_DISPLAY_TEMP_DATA,
 }max32664InitOperationState_e;
 
@@ -53,24 +71,7 @@ static max32664InitOperationState_e currentInitStateMachineState = MAX32664_STAR
 static max32664InitState_e max32664CurrentInitState = MAX32664_INIT_IDLE;
 static void sendIndicationsOfMax32664version(uint8_t version);
 
-/* -------------------------------------------------------------------------------------
- * convertToIEEE11073
- * ------------------------------------------------------------------------------------
- * @Purpose : This function converts a floating-point temperature value into the
- *            IEEE 11073 32-bit floating-point format. It encodes the temperature
- *            with an exponent of -2 (scaling factor of 100) to preserve two decimal
- *            places while maintaining a compact representation.
- * @Param   : float temperature - The temperature value to be converted.
- * @Return  : uint32_t - The IEEE 11073 formatted 32-bit representation of the temperature.
- *-------------------------------------------------------------------------------------*/
-static uint32_t convertToIEEE11073(float temperature) {
-    uint8_t exponent = 0xFE; // Exponent of -2 (i.e., divide by 100)
-    int32_t mantissa = (int32_t)(temperature * 100); // Scale to 2 decimal places
 
-    uint32_t ieee11073_value = ((uint32_t)exponent << 24) | (mantissa & 0x00FFFFFF);
-
-    return ieee11073_value;
-}
 void max32664StateMachine(sl_bt_msg_t *bleEvent)
 {
   allEvents_t event = INVALID_EVENT;
@@ -107,7 +108,10 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
           event = COMP0_EVENT;
       } else if (bleEvent->data.evt_system_external_signal.extsignals & LETIMER0_COMP1) {
           event = COMP1_EVENT;
-      }
+      }else if(bleEvent->data.evt_system_external_signal.extsignals & MAX_MFIO_INTERRUPT)
+        {
+          event = MAX_MFIO_EVENT;
+        }
       break;
     default:
       break;
@@ -138,13 +142,36 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
             break;
           case MAX32664_STATE_SET_RESET_PIN:
             {
-              if (event == COMP1_EVENT) {
+              if(event == COMP1_EVENT)
+                {
                   configureBioSensorHubMfioPin();
-                  readDeviceMode();
+                  currentInitStateMachineState = MAX32664_SELECT_DEVICE_MODE;
+                  selectDeviceMode(MAX32664_MODE_APP);
+                }
+
+            }
+            break;
+          case MAX32664_SELECT_DEVICE_MODE:
+            {
+              if(event==I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState = MAX32664_WAIT_FOR_DEVICE_MODE_SELECTION;
+                  waitForDeviceModeSelection();
+                }
+            }
+            break;
+
+          case MAX32664_WAIT_FOR_DEVICE_MODE_SELECTION:
+            {
+              if (event == COMP1_EVENT) {
                   currentInitStateMachineState=MAX32664_STATE_APP_READ;
+                  readDeviceMode();
+
               }
             }
             break;
+
+
           case MAX32664_STATE_APP_READ:
             {
               if(event==I2C_TRANSFER_EVENT)
@@ -154,8 +181,9 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                   uint8_t buffsize= getLastReadBuffer(&dataRead);
                   if((buffsize==2) && (dataRead[0]==0x00) && (dataRead[1]==0x00))
                   {
-                    currentInitStateMachineState=MAX32664_STATE_HUB_VERSION_READ;
-                    readSensorHubVersion();
+                    currentInitStateMachineState=MAX32664_SELECT_ALGO_MODE;
+                    selectAlgoMode();
+
                   }
               }
                   else
@@ -163,11 +191,121 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                       max32664CurrentInitState = MAX32664_INIT_FAILED;
                     // Failed, reset state machine
                       currentInitStateMachineState=MAX32664_START_APP_MODE_OPERATION;
-                      sendIndicationsOfMax32664version(23);
+
                   }
 
               }
           break;
+
+          case  MAX32664_SELECT_ALGO_MODE:
+            {
+              if(event==I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_ALGO_MODE_SELECTION;
+                  waitForAlgoModeSelection();
+                }
+            }
+            break;
+//          case MAX32664_WAIT_FOR_ALGO_MODE_SELECTION:
+//            {
+//              if(event==COMP1_EVENT)
+//                {
+//
+//                  currentInitStateMachineState=MAX32664_SET_THRESHOLD_VALUE;
+//                  setThresholdData(200);
+//
+//
+//                }
+//            }
+//            break;
+//
+//          case MAX32664_SET_THRESHOLD_VALUE:
+//            {
+//              if(event==I2C_TRANSFER_EVENT)
+//                {
+//                  currentInitStateMachineState=MAX32664_WAIT_TO_SET_THRESHOLD_DATA;
+//                  waitToSetThresholdData();
+//                }
+//            }
+//            break;
+          case MAX32664_WAIT_FOR_ALGO_MODE_SELECTION:
+            if(event==COMP1_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_SET_REPORT_PERIOD_VALUE;
+                max32664SetReportPeriod(125);
+              }
+            break;
+
+          case MAX32664_SET_REPORT_PERIOD_VALUE:
+            {
+              if(event==I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_ENABLE_SENSOR;
+                  enableSensor();
+                }
+            }
+            break;
+
+          case MAX32664_ENABLE_SENSOR:
+            if(event == I2C_TRANSFER_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_WAIT_FOR_SENSOR_TO_ENABLE;
+                waitForSensorToEnable();
+
+              }
+            break;
+          case MAX32664_WAIT_FOR_SENSOR_TO_ENABLE:
+            if(event == COMP1_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_ENABLE_AGC_ALGORITHM;
+                enableAGCAlgorithm();
+              }
+            break;
+          case MAX32664_ENABLE_AGC_ALGORITHM:
+            if(event==I2C_TRANSFER_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_WAIT_FOR_AGC_ENABLE;
+                waitForAGCAlgoToEnable();
+              }
+            break;
+          case MAX32664_WAIT_FOR_AGC_ENABLE:
+            if(event==COMP1_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_ENABLE_WEARABLE_SUITE;
+                enableWearableAlgoSuite();
+              }
+            break;
+          case MAX32664_ENABLE_WEARABLE_SUITE:
+            {
+            if(event == I2C_TRANSFER_EVENT)
+              {
+                currentInitStateMachineState=MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE;
+                waitForWearableAlgoSuiteToEnable();
+              }
+            }
+            break;
+          case MAX32664_WAIT_FOR_WEARABLE_ALGO_SUITE_TO_ENABLE:
+            {
+              if(event == COMP1_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_INIT_TO_COMPLETE;
+                  waitForInitComplete();
+
+                }
+            }
+            break;
+
+          case MAX32664_WAIT_FOR_INIT_TO_COMPLETE:
+            {
+              if(event == COMP1_EVENT)
+                {
+                  currentInitStateMachineState = MAX32664_STATE_HUB_VERSION_READ;
+                  readSensorHubVersion();
+
+                }
+
+            }
+            break;
           case MAX32664_STATE_HUB_VERSION_READ:
             {
               if(event==I2C_TRANSFER_EVENT)
@@ -186,9 +324,13 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
                  }
                  else
                  {
-                     max32664CurrentInitState = MAX32664_INIT_SUCCESSFUL;
+                     currentInitStateMachineState=MAX32664_PERFORM_DUMMY_READ;
+
                      float version = getHubVersion();
-                     sendIndicationsOfMax32664version(23);
+                     max32664ReadFirstTime();
+                     //gpioMaxMFIOInterruptConfigure();
+
+                     //sendIndicationsOfMax32664version(23);
                      //sendIndicationsOfMax32664version(version);
                  }
 
@@ -197,6 +339,42 @@ void max32664StateMachine(sl_bt_msg_t *bleEvent)
              }
             }
           break;
+          case MAX32664_PERFORM_DUMMY_READ:
+            {
+              if(event==I2C_TRANSFER_EVENT)
+                {
+                  max32664ConfigInterrupts();
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
+                  max32664CurrentInitState= MAX32664_INIT_SUCCESSFUL;
+
+                }
+            }
+
+
+            break;
+
+          case MAX32664_WAIT_FOR_INTERRUPT:
+            {
+              if(event==MAX_MFIO_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_PERFORM_READ;
+                  performSensorRead();
+                }
+            }
+
+            break;
+          case MAX32664_PERFORM_READ:
+            {
+              if(event== I2C_TRANSFER_EVENT)
+                {
+                  currentInitStateMachineState=MAX32664_WAIT_FOR_INTERRUPT;
+                  parseAlgoData();
+                  checkIfDataIsValid();
+                }
+
+            }
+            break;
+
           default:
             break;
 
@@ -231,7 +409,7 @@ static void sendIndicationsOfMax32664version(uint8_t version)
   //uint32_t ieee11073_temp = convertToIEEE11073(version);
   memcpy(&heart_rate_buffer[1], &version, sizeof(version));
   // Update GATT database with new version value
-   sl_status_t sc = sl_bt_gatt_server_write_attribute_value(
+   sl_bt_gatt_server_write_attribute_value(
        gattdb_heart_rate_measurement,  // Handle from gatt_db.h
        0,  // Offset (start of characteristic value)
        sizeof(heart_rate_buffer),
@@ -242,7 +420,7 @@ static void sendIndicationsOfMax32664version(uint8_t version)
    ble_data_struct_t* bleDataPtr = getBleData();
    // Send indication if conditions are met
    if (bleDataPtr->connection_open && bleDataPtr->ok_to_send_heartrate_indications && !bleDataPtr->indication_in_flight_heartrate) {
-       sc = sl_bt_gatt_server_send_indication(
+       sl_bt_gatt_server_send_indication(
            bleDataPtr->connection_handle, // Connection handle
            gattdb_heart_rate_measurement, // Handle from gatt_db.h
            sizeof(heart_rate_buffer), // Length

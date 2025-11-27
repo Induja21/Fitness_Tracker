@@ -12,6 +12,16 @@
 #include "sl_status.h"
 #include "em_gpio.h"
 
+
+typedef enum
+{
+    MAX32664_MODE_APP       = 0x00,  // Enter Application Mode (exit bootloader)
+    MAX32664_MODE_SHUTDOWN  = 0x01,  // Shutdown B/C (requires power cycle or reset pin)
+    MAX32664_MODE_RESET     = 0x02,  // Soft reset device (same as RSTN pulse)
+    MAX32664_MODE_BOOT      = 0x08   // Enter Bootloader mode
+} max32664_mode_t;
+
+
 // Status and Error Codes
 #define SFE_BIO_SUCCESS          0x00
 #define SFE_BIO_ERR_UNKNOWN      0xFF
@@ -19,6 +29,7 @@
 #define MAX32664_I2C_ADDR        0x55
 
 // Family Byte Definitions
+#define SELECT_DEVICE_MODE       0x01
 #define READ_DEVICE_MODE         0x02
 #define IDENTITY                 0xFF
 #define BOOTLOADER_INFO          0x81
@@ -120,4 +131,22 @@ void setBioSensorHubMfioPin();
 void clearBioSensorHubMfioPin();
 void configureBioSensorHubMfioPin();
 void configureBioSensorHubResetPin();
+void selectDeviceMode(max32664_mode_t mode);
+void waitForDeviceModeSelection();
+void selectAlgoMode();
+void waitForAlgoModeSelection();
+void setThresholdData(uint8_t thresholdValue);
+void waitToSetThresholdData();
+void enableSensor();
+void waitForSensorToEnable();
+void enableAGCAlgorithm();
+void waitForAGCAlgoToEnable();
+void enableWearableAlgoSuite();
+void waitForWearableAlgoSuiteToEnable();
+void max32664ConfigInterrupts();
+void max32664ReadFirstTime();
+void max32664SetReportPeriod(uint8_t reportPeriodValue);
+bool checkIfDataIsValid();
+void parseAlgoData(void);
+void performSensorRead();
 #endif /* SRC_MAX32664_H_ */

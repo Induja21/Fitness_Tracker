@@ -1,6 +1,7 @@
 #include "max32664.h"
 #include "timer.h"
-
+#include <stddef.h>
+#include <stdio.h>
 
 #define MAX32664_RESET_PIN 13  // Example pin for RESET (Port B, Pin 13)
 #define MAX32664_MFIO_PIN  5  // Example pin for MFIO (Port F, Pin 6)
@@ -8,14 +9,21 @@
 #define CMD_DELAY_IN_US 60000
 
 
-uint8_t readResponse[4];
+uint8_t readResponse[16];
 uint8_t lastReadSize=0;
 I2C_TransferSeq_TypeDef i2cTransfer;
 
 static bioSensorHub_t max32664_hub;
 I2C_TransferSeq_TypeDef i2cTransfer;
 
+typedef struct {
+    uint16_t heartRate;
+    uint8_t confidence;
+    uint8_t spo2;
+    uint8_t status;
+} max32664_data_t;
 
+max32664_data_t maxData;
 void max32664StartInitAppmode(void)
 {
   // Initialize hub structure
@@ -91,6 +99,128 @@ static I2C_TransferReturn_TypeDef startReadBioSensorReg( uint8_t command, uint8_
     NVIC_EnableIRQ(I2C0_IRQn);
     return transferStatus;
 }
+
+
+static I2C_TransferReturn_TypeDef startWriteBioSensorReg(uint8_t command,
+                                                         uint8_t index,
+                                                         const uint8_t *payload,
+                                                         uint8_t payloadLen)
+{
+    static uint8_t txBuf[16];
+
+    txBuf[0] = command;
+    txBuf[1] = index;
+
+    // Copy payload if present
+    if(payload != NULL && payloadLen > 0)
+    {
+        memcpy(&txBuf[2], payload, payloadLen);
+    }
+
+    // Setup I2C transfer (write only)
+    i2cTransfer.addr        = max32664_hub.device.i2c_cfg.address << 1;
+    i2cTransfer.flags       = I2C_FLAG_WRITE;
+
+    i2cTransfer.buf[0].data = txBuf;
+    i2cTransfer.buf[0].len  = payloadLen + 2;  // command + index + payload
+
+    i2cTransfer.buf[1].data = NULL;
+    i2cTransfer.buf[1].len  = 0;
+
+    I2C_TransferReturn_TypeDef transferStatus =
+        I2C_TransferInit(max32664_hub.device.i2c_cfg.i2c_port, &i2cTransfer);
+
+    if (transferStatus < 0)
+    {
+        //LOG_ERROR("I2C Write error %d", transferStatus);
+    }
+
+    I2C_IntEnable(I2C0, I2C_IEN_MSTOP);
+    NVIC_EnableIRQ(I2C0_IRQn);
+    return transferStatus;
+}
+
+void selectDeviceMode(max32664_mode_t mode)
+{
+    // The device mode value is the payload
+    uint8_t payload = (uint8_t)mode;
+
+    // Send command: [0x02][0x00][MODE]
+    startWriteBioSensorReg(SELECT_DEVICE_MODE, 0, &payload, 1);
+
+}
+
+void waitForDeviceModeSelection()
+{
+  // Timing requirement: allow internal state switch
+  timerWaitUs_interrupt(50000);  // 50ms recommended delay
+}
+
+
+void selectAlgoMode()
+{
+  uint8_t algoMode = 0x01;
+  startWriteBioSensorReg(OUTPUT_MODE, 0, &algoMode, 1);
+}
+
+void waitForAlgoModeSelection()
+{
+  timerWaitUs_interrupt(50000);  // 50ms recommended delay
+}
+
+void setThresholdData(uint8_t thresholdValue)
+{
+  startWriteBioSensorReg(OUTPUT_MODE, 0x01, &thresholdValue, 1);
+
+}
+
+void waitToSetThresholdData()
+{
+  timerWaitUs_interrupt(50000);
+
+}
+
+void enableSensor()
+{
+  uint8_t on = 0x01;
+  startWriteBioSensorReg(0x44, 0x03, &on, 1);
+
+}
+
+void waitForSensorToEnable()
+{
+  timerWaitUs_interrupt(50000);
+}
+
+void enableAGCAlgorithm()
+{
+  uint8_t on = 0x01;
+  startWriteBioSensorReg(0x52, 0x00, &on, 1);
+}
+
+void waitForAGCAlgoToEnable()
+{
+  timerWaitUs_interrupt(50000);
+}
+void enableWearableAlgoSuite()
+{
+  // FAMILY = 0x52 (Algorithm)
+  // INDEX  = 0x07 (Wearable Suite WHRM + WSpO2)
+  // VALUE  = 0x01 (Enable Mode 1)
+  uint8_t wearable = 0x01;
+  startWriteBioSensorReg(0x52, 0x07, &wearable, 1);
+
+}
+
+void waitForWearableAlgoSuiteToEnable()
+{
+  timerWaitUs_interrupt(120000);
+}
+
+void waitForInitComplete()
+{
+  timerWaitUs_interrupt(1000000);
+}
 void readDeviceMode()
 {
   lastReadSize=2;
@@ -99,6 +229,7 @@ void readDeviceMode()
   startReadBioSensorReg(READ_DEVICE_MODE, 0x00, readResponse, lastReadSize);
 
 }
+
 
 /* Read sensor hub version */
 void readSensorHubVersion()
@@ -146,4 +277,66 @@ uint8_t getLastReadBuffer(const uint8_t** readBuffer)
 {
   *readBuffer=readResponse;
   return lastReadSize;
+}
+#define MAX_MFIO_PIN (5)
+
+void max32664ConfigInterrupts()
+{
+
+
+  GPIO_IntClear(1 << MAX_MFIO_PIN);
+  NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+
+
+  // MFIO same config
+ GPIO_ExtIntConfig(gpioPortF, MAX_MFIO_PIN, MAX_MFIO_PIN, false, true, true);
+
+ GPIO_PinModeSet(gpioPortF, MAX_MFIO_PIN, gpioModeInputPullFilter, 1);
+ // NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+  NVIC_EnableIRQ(GPIO_ODD_IRQn);
+}
+void max32664ReadFirstTime()
+{
+
+  if (GPIO_PinInGet(gpioPortF, MAX_MFIO_PIN) == 0)
+  {
+
+      lastReadSize = 5;
+
+      // Read processed algorithm output sample (FIFO one sample)
+      // Family: 0x12, Index: 0x01
+      startReadBioSensorReg(0x12, 0x01, readResponse, lastReadSize);
+  }
+
+
+}
+
+void performSensorRead()
+{
+
+      lastReadSize = 5;
+
+      // Read processed algorithm output sample (FIFO one sample)
+      // Family: 0x12, Index: 0x01
+      startReadBioSensorReg(0x12, 0x01, readResponse, lastReadSize);
+
+
+}
+bool checkIfDataIsValid()
+{
+  return (maxData.status == 3 && maxData.confidence > 80);
+}
+void parseAlgoData(void)
+{
+    // parse only if 6 bytes are received:
+    maxData.heartRate  = ((uint16_t)readResponse[1] << 8) | readResponse[2];
+    maxData.confidence = readResponse[3];
+    maxData.spo2       = readResponse[4];
+    maxData.status     = readResponse[5];
+}
+
+void max32664SetReportPeriod(uint8_t reportPeriodValue)
+{
+  startWriteBioSensorReg(OUTPUT_MODE, 0x02, &reportPeriodValue, 1);
+
 }
