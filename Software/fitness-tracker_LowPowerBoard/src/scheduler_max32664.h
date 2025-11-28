@@ -20,5 +20,5 @@ typedef enum max32664InitState
 } max32664InitState_e;
 void max32664StateMachine(sl_bt_msg_t *bleEvent);
 max32664InitState_e getLatestInitState(void);
-
+void max32664StateMachineCalibrationMode(sl_bt_msg_t *bleEvent);
 #endif /* SRC_SCHEDULER_MAX32664_H_ */

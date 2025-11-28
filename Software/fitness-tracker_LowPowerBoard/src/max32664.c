@@ -2,6 +2,7 @@
 #include "timer.h"
 #include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #define MAX32664_RESET_PIN 13  // Example pin for RESET (Port B, Pin 13)
 #define MAX32664_MFIO_PIN  5  // Example pin for MFIO (Port F, Pin 6)
@@ -9,7 +10,8 @@
 #define CMD_DELAY_IN_US 60000
 
 
-uint8_t readResponse[256];
+uint8_t readResponse[1024];
+uint8_t calibrationData[825] = {0x03,0,0,3,0,0,5,0,0,0,0,0,220,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,1,0,0,0,0,0,221,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,4};
 uint8_t lastReadSize=0;
 I2C_TransferSeq_TypeDef i2cTransfer;
 
@@ -17,13 +19,19 @@ static bioSensorHub_t max32664_hub;
 I2C_TransferSeq_TypeDef i2cTransfer;
 
 typedef struct {
-    uint16_t heartRate;
-    uint8_t confidence;
-    uint8_t spo2;
-    uint8_t status;
-} max32664_data_t;
+    uint32_t ir;
+    uint32_t red;
+    uint8_t bpStatus;
+    uint8_t progress;
+    float heartRate;
+    uint8_t systolic;
+    uint8_t diastolic;
+    float spo2;
+    float rRatio;
+    uint8_t hrAboveResting;
+} maxBptData_t;
 
-max32664_data_t maxData;
+maxBptData_t maxData;
 void max32664StartInitAppmode(void)
 {
   // Initialize hub structure
@@ -100,6 +108,46 @@ static I2C_TransferReturn_TypeDef startReadBioSensorReg( uint8_t command, uint8_
     return transferStatus;
 }
 
+static I2C_TransferReturn_TypeDef startReadBioSensorRegCalibration( uint8_t command, uint8_t index, uint8_t cmd1)
+{
+    uint8_t cmd[3] = { command, index,cmd1 };
+
+    i2cTransfer.addr = max32664_hub.device.i2c_cfg.address << 1;
+    i2cTransfer.flags = I2C_FLAG_WRITE;
+    i2cTransfer.buf[0].data = cmd;
+    i2cTransfer.buf[0].len = 3;
+    i2cTransfer.buf[1].data = NULL;
+    i2cTransfer.buf[1].len = 0; // +1 for status byte
+
+    I2C_TransferReturn_TypeDef transferStatus = I2C_TransferInit(max32664_hub.device.i2c_cfg.i2c_port, &i2cTransfer);
+    if (transferStatus < 0) {
+        //LOG_ERROR("I2C_TransferInit() Read error = %d", transferStatus);
+    }
+    I2C_IntEnable(I2C0, I2C_IEN_MSTOP);
+    NVIC_EnableIRQ(I2C0_IRQn);
+    return transferStatus;
+}
+
+static I2C_TransferReturn_TypeDef startReadBioSensorRegCalibrationOperation( uint8_t *data, uint8_t len)
+{
+
+
+    i2cTransfer.addr = max32664_hub.device.i2c_cfg.address << 1;
+    i2cTransfer.flags = I2C_FLAG_READ;
+    i2cTransfer.buf[0].data = data;
+    i2cTransfer.buf[0].len = len+1;
+    i2cTransfer.buf[1].data = NULL;
+    i2cTransfer.buf[1].len = 0; // +1 for status byte
+
+    I2C_TransferReturn_TypeDef transferStatus = I2C_TransferInit(max32664_hub.device.i2c_cfg.i2c_port, &i2cTransfer);
+    if (transferStatus < 0) {
+        //LOG_ERROR("I2C_TransferInit() Read error = %d", transferStatus);
+    }
+    I2C_IntEnable(I2C0, I2C_IEN_MSTOP);
+    NVIC_EnableIRQ(I2C0_IRQn);
+    return transferStatus;
+}
+
 static I2C_TransferReturn_TypeDef startRequestReadBioSensorRegFiFo( uint8_t command, uint8_t index)
 {
   uint8_t cmd[2] = { command, index };
@@ -143,9 +191,9 @@ static I2C_TransferReturn_TypeDef startReadBioSensorRegFiFo( uint8_t *data, uint
 static I2C_TransferReturn_TypeDef startWriteBioSensorReg(uint8_t command,
                                                          uint8_t index,
                                                          const uint8_t *payload,
-                                                         uint8_t payloadLen)
+                                                         uint16_t payloadLen)
 {
-    static uint8_t txBuf[16];
+    static uint8_t txBuf[830];
 
     txBuf[0] = command;
     txBuf[1] = index;
@@ -189,6 +237,11 @@ void selectDeviceMode(max32664_mode_t mode)
 
 }
 
+void loadCalibrationData()
+{
+  startWriteBioSensorReg(0x50,0x04,calibrationData,825);
+
+}
 void waitForDeviceModeSelection()
 {
   // Timing requirement: allow internal state switch
@@ -251,10 +304,49 @@ void enableBPTAlgoSuite()
 
 }
 
+void enableBPTAlgoSuiteInCalibrationMode()
+{
+  // FAMILY = 0x52 (Algorithm)
+  // INDEX  = 0x04 (Wearable Suite WHRM + WSpO2)
+  // VALUE  = 0x02 (Enable Mode 1)
+  uint8_t calibrationMode = 0x01;
+  startWriteBioSensorReg(0x52, 0x04, &calibrationMode, 1);
+
+}
+
+void setDateAndTime()
+{
+  uint8_t dateTime[]={0x04,0x87,0xD5,0x03,00,0x5B,0x2F,0x02,0x00};
+  startWriteBioSensorReg(0x50, 0x04, dateTime, sizeof(dateTime));
+}
+
+void setSpO2Data()
+{
+  uint8_t spO2[]={0x06,0x00,0x02,0x6F,0x60,0xFF,0xCB,0x1D,0x12,0x00,0xAB,0xF3,0x7B};
+  startWriteBioSensorReg(0x50, 0x04, spO2, sizeof(spO2));
+}
+
+void setSystolicValues()
+{
+  uint8_t systolicValues[]={0x01,0x78,0x7A,0x7D};
+  startWriteBioSensorReg(0x50, 0x04, systolicValues, sizeof(systolicValues));
+}
+
+void setDiastolicValues()
+{
+  uint8_t systolicValues[]={0x02,0x50,0x51,0x52};
+  startWriteBioSensorReg(0x50, 0x04, systolicValues, sizeof(systolicValues));
+}
 void waitForBPTAlgoSuiteToEnable()
 {
   timerWaitUs_interrupt(40000);
 }
+
+void waitForBPTAlgoSuiteCalibrationToEnable()
+{
+  timerWaitUs_interrupt(100000);
+}
+
 
 void waitForInitComplete()
 {
@@ -321,19 +413,23 @@ uint8_t getLastReadBuffer(const uint8_t** readBuffer)
 
 void max32664ConfigInterrupts()
 {
+    // 1. Configure MFIO pin as input with pull-up (MFIO is active LOW)
+    GPIO_PinModeSet(gpioPortF, MAX_MFIO_PIN, gpioModeInputPullFilter, 1);
 
+    // 2. Configure interrupt (falling edge)
+    GPIO_ExtIntConfig(gpioPortF, MAX_MFIO_PIN, MAX_MFIO_PIN,
+                      false,    // risingEdge = false
+                      true,     // fallingEdge = true
+                      true);    // enable = true
 
-  GPIO_IntClear(1 << MAX_MFIO_PIN);
-  NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+    // 3. Clear flags
+    GPIO_IntClear(1 << MAX_MFIO_PIN);
+    NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
 
-
-  // MFIO same config
- GPIO_ExtIntConfig(gpioPortF, MAX_MFIO_PIN, MAX_MFIO_PIN, false, true, true);
-
- GPIO_PinModeSet(gpioPortF, MAX_MFIO_PIN, gpioModeInputPullFilter, 1);
- // NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
-  NVIC_EnableIRQ(GPIO_ODD_IRQn);
+    // 4. Enable NVIC IRQ
+    NVIC_EnableIRQ(GPIO_ODD_IRQn);
 }
+
 void max32664ReadFirstTime()
 {
 
@@ -358,7 +454,7 @@ void startreadNoOfSamplesinFiFo()
 
 void i2cDelayForReadOperation()
 {
-  timerWaitUs_interrupt(2500);
+  timerWaitUs_interrupt(2000);
 }
 
 void performReadOfNofSamplesInFiFo()
@@ -385,7 +481,7 @@ void startperformSensorRead()
 
 }
 
-void performSensorReadOperation(uint8_t readSize)
+void performSensorReadOperation(uint16_t readSize)
 {
   lastReadSize = readSize;
 
@@ -395,6 +491,16 @@ void performSensorReadOperation(uint8_t readSize)
 
 }
 
+uint8_t getProgress()
+{
+  return readResponse[13];
+}
+
+
+uint8_t getBPStatus()
+{
+  return readResponse[12];
+}
 void readStatusByte()
 {
   lastReadSize=2;
@@ -409,20 +515,66 @@ uint8_t getStatusByte()
     }
   return 0;
 }
+void disableAFE()
+{
+  uint8_t off = 0x00;
+  startWriteBioSensorReg(0x44, 0x03, &off, 1);
 
+}
+
+void disableBPTAlgorithm()
+{
+  uint8_t off = 0x00;
+   startWriteBioSensorReg(0x52, 0x04, &off, 1);
+
+}
+
+void readCalibrationData()
+{
+
+  startReadBioSensorRegCalibration(0x52,0x04,0x03);
+}
+
+void readCalibrationDataSecond()
+{
+  lastReadSize = 824;
+  memset(readResponse,0,sizeof(readResponse));
+  startReadBioSensorRegCalibrationOperation(readResponse,824);
+
+}
+uint8_t* getCalibrationData()
+{
+  return readResponse[1];
+}
 bool checkIfDataIsValid()
 {
-  return (maxData.status == 3 && maxData.confidence > 80);
+  return (maxData.bpStatus == 3 && maxData.progress > 90);
 }
 void parseAlgoData(void)
 {
-    // Parse BPT algorithm data from FIFO sample (bytes 12+ of 23-byte sample)
-    // Assumes readResponse contains full 23-byte FIFO sample
-    maxData.heartRate  = ((uint16_t)readResponse[14] << 8) | readResponse[15];  // Bytes 14-15: 10x HR (MSB first)
-    maxData.confidence = readResponse[13];                                      // Byte 13: Progress % (confidence)
-    maxData.spo2       = ((uint16_t)readResponse[18] << 8) | readResponse[19]; // Bytes 18-19: 10x SpO2 (MSB first)
-    maxData.status     = readResponse[12];                                      // Byte 12: BP status
+    // Raw PPG values: 24-bit (MSB first)
+    maxData.ir  = (readResponse[0] << 16) | (readResponse[1] << 8) | readResponse[2];
+    maxData.red = (readResponse[3] << 16) | (readResponse[4] << 8) | readResponse[5];
+
+    // BPT algorithm outputs
+    maxData.bpStatus  = readResponse[12];                    // BP Status
+    maxData.progress  = readResponse[13];                    // Percentage progress
+
+    maxData.heartRate = ((readResponse[14] << 8) |
+                          readResponse[15]) / 10.0f;         // HR x10 -> float BPM
+
+    maxData.systolic  = readResponse[16];                    // SBP (mmHg)
+    maxData.diastolic = readResponse[17];                    // DBP (mmHg)
+
+    maxData.spo2      = ((readResponse[18] << 8) |
+                          readResponse[19]) / 10.0f;         // SpO2 x10 -> %
+
+    maxData.rRatio    = ((readResponse[20] << 8) |
+                          readResponse[21]) / 1000.0f;       // Ratio R
+
+    maxData.hrAboveResting = readResponse[22];               // 0 or 1
 }
+
 
 
 void max32664SetReportPeriod(uint8_t reportPeriodValue)

@@ -159,7 +159,6 @@ void schedulerSetEventPF5(void)
   uint32_t flags = GPIO_IntGet();
   GPIO_IntClear(flags);
 
-;
   // Enter critical section
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();

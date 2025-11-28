@@ -276,7 +276,9 @@ void sl_bt_on_event(sl_bt_msg_t *evt)
   max32664InitState_e maxInitState = getLatestInitState();
   if((maxInitState==MAX32664_INIT_IN_PROGRESS) ||(maxInitState==MAX32664_INIT_IDLE))
     {
-      max32664StateMachine(evt);
+
+      //max32664StateMachineCalibrationMode(evt);
+      max32664StateMachineAsPerDatasheet(evt);
       //Update latest initState
       maxInitState = getLatestInitState();
     }
