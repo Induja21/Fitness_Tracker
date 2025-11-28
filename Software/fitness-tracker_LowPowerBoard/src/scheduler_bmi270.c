@@ -8,6 +8,8 @@
 #include "bmi270.h"
 #include "gatt_db.h"
 #include "ble.h"
+#include "MIP.h"
+#include "sl_power_manager.h"
 
 
 typedef enum leTimerEvents
@@ -18,6 +20,8 @@ typedef enum leTimerEvents
   I2C_TRANSFER_EVENT,
   MAX_MFIO_EVENT,
   BMI_INT1_EVENT,
+  NEXT_INDICATION_CAN_BE_SENT,
+  INDICATION_ALL_DONE,
   INVALID_EVENT
 }allEvents_t;
 
@@ -52,6 +56,7 @@ typedef enum bmi270InitOperationState {
 
 typedef enum bmi270DataOperationState{
   BMI270_WAIT_FOR_INTERRUPT,
+  BMI270_SEND_BPM_INDICATION,
   BMI270_READ_BMI_INT_STATUS_REG,
   BMI270_READ_STEP_COUNTER_DATA,
   BMI270_SEND_INDICATION
@@ -67,7 +72,7 @@ typedef enum bmi270DataOperationState{
 static bmi270InitOperationState_e currentInitStateMachineState = BMI270_START_INITIALIZATION;
 static bmi270DataOperationState_e currentDataHandlingStateMachineState = BMI270_WAIT_FOR_INTERRUPT;
 static bmi270InitStatus_e bmi270InitStatus = BMI270_INIT_IDLE;
-
+extern const GFXfont FreeMono12pt7b;
 
 void bmi270StateMachine(sl_bt_msg_t *bleEvent)
 {
@@ -308,12 +313,14 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
                 if(event == I2C_TRANSFER_EVENT) {
                     currentInitStateMachineState=BMI270_STATE_INIT_COMPLETE;
                     bmi270InitStatus = BMI270_INIT_SUCCESSFUL;
+
                 }
                 break;
 
               default:
                   break;
           }
+          sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
       }
 }
 
@@ -323,6 +330,50 @@ bmi270InitStatus_e getLatestBmi270InitState()
 
 }
 
+void sendIndicationsOfHeartBeat(uint16_t heartBeat)  // allow up to 16-bit BPM
+{
+  uint8_t heart_buffer[3];
+  uint8_t length = 0;
+
+  // Flags: 0x00 = UINT8 HR, no extras
+  heart_buffer[0] = 0x00;
+  length = 1;
+
+  if (heartBeat <= 0xFF) {
+    // UINT8 value
+    heart_buffer[1] = (uint8_t)heartBeat;
+    length += 1;
+  } else {
+    // Set flag bit0 = 1 to indicate UINT16 format
+    heart_buffer[0] |= 0x01;
+    heart_buffer[1] = (uint8_t)(heartBeat & 0xFF);
+    heart_buffer[2] = (uint8_t)((heartBeat >> 8) & 0xFF);
+    length += 2;
+  }
+
+  sl_status_t sc = sl_bt_gatt_server_write_attribute_value(
+      gattdb_heart_rate_measurement,
+      0,
+      length,
+      heart_buffer);
+
+  ble_data_struct_t* bleDataPtr = getBleData();
+
+  if (bleDataPtr->connection_open &&
+      bleDataPtr->ok_to_send_heartrate_indications &&
+      !bleDataPtr->indication_in_flight_heartrate)
+  {
+      sc = sl_bt_gatt_server_send_indication(
+          bleDataPtr->connection_handle,
+          gattdb_heart_rate_measurement,
+          length,
+          heart_buffer);
+
+      if (sc == SL_STATUS_OK) {
+          bleDataPtr->indication_in_flight_heartrate = true;
+      }
+  }
+}
 static void sendIndicationsOfStepCount(uint32_t stepCount)
 {
   // Buffer for 32-bit integer (4 bytes)
@@ -377,12 +428,40 @@ static void sendIndicationsOfStepCount(uint32_t stepCount)
 void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
 {
   allEvents_t event = INVALID_EVENT;
+  // Steps Text: Middle Right
+  uint16_t step_text_x = 100;
+  uint16_t step_text_y = 130;
+  uint16_t bpm_text_x = 100;
+  uint16_t bpm_text_y = 50;
+  char display_buffer[20];
+  static uint8_t my_heart_rate[6]={85,82,88,87,81,82};
+  static uint8_t index=0;
    switch (SL_BT_MSG_ID(bleEvent->header)) {
      case sl_bt_evt_connection_opened_id:
          break;
      case sl_bt_evt_connection_closed_id:
        break;
      case sl_bt_evt_gatt_server_characteristic_status_id:
+             {
+               // Get the status flags and client configuration flags from the event
+               uint8_t status_flags = bleEvent->data.evt_gatt_server_characteristic_status.status_flags;
+               uint16_t characteristic = bleEvent->data.evt_gatt_server_characteristic_status.characteristic;
+
+               if(status_flags == sl_bt_gatt_server_confirmation)
+                 {
+                   if (characteristic == gattdb_Steps)
+                    {
+                       event =NEXT_INDICATION_CAN_BE_SENT;
+                    }
+                   if(characteristic == gattdb_heart_rate_measurement)
+                     {
+                       event =INDICATION_ALL_DONE;
+                     }
+                 }
+
+
+
+             }
        break;
      case sl_bt_evt_system_external_signal_id:
        if(bleEvent->data.evt_system_external_signal.extsignals & I2C_TRANSFER_DONE)
@@ -404,7 +483,7 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
        break;
    }
 
-   if(SL_BT_MSG_ID(bleEvent->header) == sl_bt_evt_system_external_signal_id) {
+   if((SL_BT_MSG_ID(bleEvent->header) == sl_bt_evt_system_external_signal_id)||(event == NEXT_INDICATION_CAN_BE_SENT)||(event==INDICATION_ALL_DONE)){
        switch (currentDataHandlingStateMachineState) {
          case BMI270_WAIT_FOR_INTERRUPT:
            {
@@ -429,9 +508,14 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
            {
              if(event==I2C_TRANSFER_EVENT)
              {
+                 index=(index+1)%6;
                  uint32_t stepcounter = getStepCounterData();
                  currentDataHandlingStateMachineState=BMI270_SEND_INDICATION;
+                 snprintf(display_buffer, sizeof(display_buffer), "%d BPM", my_heart_rate[index]);
+                 snprintf(display_buffer, sizeof(display_buffer), "%d Stp", stepcounter);
+                 kyocera_draw_string(bpm_text_x, bpm_text_y, display_buffer, &FreeMono12pt7b);
                  sendIndicationsOfStepCount(stepcounter);
+
 
              }
 
@@ -439,7 +523,18 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
            break;
          case BMI270_SEND_INDICATION:
            {
+             if(event==NEXT_INDICATION_CAN_BE_SENT)
+               {
+                 currentDataHandlingStateMachineState=BMI270_SEND_BPM_INDICATION;
+                 sendIndicationsOfHeartBeat(my_heart_rate[index]);
+               }
+
+           }
+           break;
+         case BMI270_SEND_BPM_INDICATION:
+           {
              currentDataHandlingStateMachineState=BMI270_WAIT_FOR_INTERRUPT;
+             sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
            }
            break;
          default:

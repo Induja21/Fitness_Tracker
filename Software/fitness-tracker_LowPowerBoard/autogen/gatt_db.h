@@ -17,19 +17,13 @@ extern const sli_bt_gattdb_t gattdb;
 #define gattdb_device_information             14
 #define gattdb_manufacturer_name_string       16
 #define gattdb_system_id                      18
-#define gattdb_health_thermometer             19
-#define gattdb_temperature_measurement        21
-#define gattdb_temperature_type               24
-#define gattdb_intermediate_temperature       26
-#define gattdb_measurement_interval           29
-#define gattdb_valid_range                    30
-#define gattdb_heart_rate_0                   31
-#define gattdb_heart_rate_measurement         33
-#define gattdb_pulse_oximeter_0               35
-#define gattdb_plx_spot_check_measurement     37
-#define gattdb_plx_continuous_measurement     40
-#define gattdb_StepCounter                    42
-#define gattdb_Steps                          44
+#define gattdb_heart_rate_0                   19
+#define gattdb_heart_rate_measurement         21
+#define gattdb_pulse_oximeter_0               23
+#define gattdb_plx_spot_check_measurement     25
+#define gattdb_plx_continuous_measurement     28
+#define gattdb_StepCounter                    30
+#define gattdb_Steps                          32
 
 
 #endif // __GATT_DB_H

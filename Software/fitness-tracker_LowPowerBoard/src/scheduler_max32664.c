@@ -11,6 +11,7 @@
 #include "max32664.h"
 #include "ble.h"
 #include "gpio.h"
+#include "sl_power_manager.h"
 
 
 
@@ -75,7 +76,8 @@ typedef enum max32664InitOperationState
     MAX32664_CONTINOUS_READ_OF_STATUS_BYTE,
     MAX32664_START_READ_PROGRESS,
     MAX32664_WAIT_READ_PROGRESS,
-    MAX32664_START_READ_PROGRESS_OPERATION
+    MAX32664_START_READ_PROGRESS_OPERATION,
+    MAX32664_INIT_DONE
 }max32664InitOperationState_e;
 
 
@@ -95,6 +97,8 @@ static max32664InitState_e max32664CurrentInitState = MAX32664_INIT_IDLE;
 static void sendIndicationsOfMax32664version(uint8_t version);
 
 static uint8_t noOfFiFoBytes=0;
+
+
 //void max32664StateMachine(sl_bt_msg_t *bleEvent)
 //{
 //  allEvents_t event = INVALID_EVENT;
@@ -1130,11 +1134,11 @@ void max32664StateMachineAsPerDatasheet(sl_bt_msg_t *bleEvent)
                }
                else
                {
-                   currentInitStateMachineState=MAX32664_LOAD_DATA;
-
+                   currentInitStateMachineState=MAX32664_INIT_DONE;
+                   max32664CurrentInitState = MAX32664_INIT_SUCCESSFUL;
                    float version = getHubVersion();
                    //selectAlgoMode();
-                   loadCalibrationData();
+                   //loadCalibrationData();
                }
 
 
@@ -1250,7 +1254,7 @@ void max32664StateMachineAsPerDatasheet(sl_bt_msg_t *bleEvent)
             if(event == COMP1_EVENT)
               {
                 currentInitStateMachineState=MAX32664_ENABLE_SENSOR;
-                max32664ConfigInterrupts();
+                //max32664ConfigInterrupts();
                 enableSensor();
               }
             }
@@ -1438,7 +1442,7 @@ void max32664StateMachineAsPerDatasheet(sl_bt_msg_t *bleEvent)
             break;
 
         }
-
+        sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
       }
 
 }
@@ -1460,35 +1464,4 @@ max32664InitState_e getLatestInitState()
  * @Param   : float temperature - The temperature value to be sent and displayed.
  * @Return  : void
  *-------------------------------------------------------------------------------------*/
-static void sendIndicationsOfMax32664version(uint8_t version)
-{
-  uint8_t heart_rate_buffer[2] = {0};
-  heart_rate_buffer[0] = 0x00; // Flags byte (0 for Celsius)
-  // Convert version to IEEE-11073 format
-  //uint32_t ieee11073_temp = convertToIEEE11073(version);
-  memcpy(&heart_rate_buffer[1], &version, sizeof(version));
-  // Update GATT database with new version value
-   sl_bt_gatt_server_write_attribute_value(
-       gattdb_heart_rate_measurement,  // Handle from gatt_db.h
-       0,  // Offset (start of characteristic value)
-       sizeof(heart_rate_buffer),
-       heart_rate_buffer
-   );
-
-   //Get the connection handle
-   ble_data_struct_t* bleDataPtr = getBleData();
-   // Send indication if conditions are met
-   if (bleDataPtr->connection_open && bleDataPtr->ok_to_send_heartrate_indications && !bleDataPtr->indication_in_flight_heartrate) {
-       sl_bt_gatt_server_send_indication(
-           bleDataPtr->connection_handle, // Connection handle
-           gattdb_heart_rate_measurement, // Handle from gatt_db.h
-           sizeof(heart_rate_buffer), // Length
-           heart_rate_buffer // Data
-       );
-
-
-   }
-
-
-}
 

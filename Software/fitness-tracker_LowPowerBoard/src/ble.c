@@ -142,7 +142,7 @@ void connection_established_event(sl_bt_msg_t *event)
 
     // Update connection status
     ble_data.connection_open = true;
-    displayPrintf(DISPLAY_ROW_CONNECTION, "Connected");
+    //displayPrintf(DISPLAY_ROW_CONNECTION, "Connected");
     // Stop advertising
     status = sl_bt_advertiser_stop(ble_data.advertisingSetHandle);
     if (status != SL_STATUS_OK) {
@@ -186,23 +186,23 @@ void handle_ble_event(sl_bt_msg_t *event) {
             //Initialize display
             displayInit();
             //Print Display contents
-            displayPrintf(DISPLAY_ROW_CONNECTION, "Advertising");
-            displayPrintf(DISPLAY_ROW_NAME, "Server");
+            //displayPrintf(DISPLAY_ROW_CONNECTION, "Advertising");
+            //displayPrintf(DISPLAY_ROW_NAME, "Server");
             // Get the Bluetooth identity address
             status = sl_bt_system_get_identity_address(&address, &address_type);
 
-            if (status == SL_STATUS_OK) {
-                // Print the address
-                displayPrintf(DISPLAY_ROW_BTADDR,"%02X:%02X:%02X:%02X:%02X:%02X\n",
-                        address.addr[0],
-                       address.addr[1],
-                       address.addr[2],
-                       address.addr[3],
-                       address.addr[4],
-                       address.addr[5]);
-            } else {
-                LOG_ERROR("Failed to get Bluetooth address, error code: 0x%04x\n", (int)status);
-            }
+//            if (status == SL_STATUS_OK) {
+//                // Print the address
+//                displayPrintf(DISPLAY_ROW_BTADDR,"%02X:%02X:%02X:%02X:%02X:%02X\n",
+//                        address.addr[0],
+//                       address.addr[1],
+//                       address.addr[2],
+//                       address.addr[3],
+//                       address.addr[4],
+//                       address.addr[5]);
+//            } else {
+//                LOG_ERROR("Failed to get Bluetooth address, error code: 0x%04x\n", (int)status);
+//            }
             //Start advertising
             start_advertising();
            // gpioInit();
@@ -220,14 +220,14 @@ void handle_ble_event(sl_bt_msg_t *event) {
             ble_data.connection_open = false;
             ble_data.ok_to_send_stepCounter_indications = false; // Disable indications when connection is closed
             ble_data.ok_to_send_heartrate_indications = false;
-            displayPrintf(DISPLAY_ROW_CONNECTION, "Advertising");
+            //displayPrintf(DISPLAY_ROW_CONNECTION, "Advertising");
 
             // Restart advertising when the connection is closed
             status = sl_bt_legacy_advertiser_start(ble_data.advertisingSetHandle, sl_bt_legacy_advertiser_connectable);
             if (status != SL_STATUS_OK) {
                 LOG_ERROR("Failed to restart advertising with error code %d", (int)status);
             }
-            displayPrintf(DISPLAY_ROW_TEMPVALUE,"");
+           // displayPrintf(DISPLAY_ROW_TEMPVALUE,"");
             break;
         }
         case sl_bt_evt_connection_parameters_id:
@@ -253,7 +253,23 @@ void handle_ble_event(sl_bt_msg_t *event) {
                 {
                   // Clear the flag here to stop sending indications
                   ble_data.ok_to_send_stepCounter_indications = false;
-                  displayPrintf(DISPLAY_ROW_TEMPVALUE,"");
+                 // displayPrintf(DISPLAY_ROW_TEMPVALUE,"");
+                }
+            }
+            // Check if this is a client characteristic configuration change
+            else if ((status_flags == sl_bt_gatt_server_client_config)&&(characteristic == gattdb_heart_rate_measurement))
+            {
+                if (client_config_flags & sl_bt_gatt_indication)
+                {
+                  //Set a flag here to allow sending indications
+                  ble_data.ok_to_send_heartrate_indications = true;
+
+                }
+                else
+                {
+                  // Clear the flag here to stop sending indications
+                  ble_data.ok_to_send_heartrate_indications = false;
+                 // displayPrintf(DISPLAY_ROW_TEMPVALUE,"");
                 }
             }
             // Check if this is an indication confirmation
@@ -265,11 +281,16 @@ void handle_ble_event(sl_bt_msg_t *event) {
                 // Clear a flag here to allow sending the next indication
                 ble_data.indication_in_flight_stepCounter = false;
               }
+              if(characteristic == gattdb_heart_rate_measurement)
+                {
+                  ble_data.indication_in_flight_heartrate = false;
+                }
             }
             break;
           }
         case sl_bt_evt_gatt_server_indication_timeout_id:
           ble_data.indication_in_flight_stepCounter = false;
+          ble_data.indication_in_flight_heartrate = false;
           break;
         default:
             break;

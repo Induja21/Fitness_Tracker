@@ -22,4 +22,5 @@ typedef enum bmi270InitState
 void bmi270StateMachine(sl_bt_msg_t *bleEvent);
 bmi270InitStatus_e getLatestBmi270InitState(void);
 void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent);
+
 #endif /* SRC_SCHEDULER_BMI270_H_ */

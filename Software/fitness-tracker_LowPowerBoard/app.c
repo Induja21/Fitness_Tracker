@@ -48,6 +48,7 @@
 #include "gatt_db.h"
 #include "app.h"
 #include "src/irq.h"
+#include "src/MIP.h"
 
 
 
@@ -202,6 +203,22 @@ SL_WEAK void app_init(void)
   leTimerInit();
   si7021I2cInit();
   powerInit();
+  kyocera_lcd_init();
+  // Startup Cleanup
+  kyocera_lcd_clear(false);
+  for(volatile int i = 0; i < 500000; i++);
+  kyocera_lcd_clear(true);
+  bool animation_state = false;
+  uint16_t heart_x = 20;
+  uint16_t heart_y = 20;
+
+  // Walker: Middle Left
+  uint16_t walker_x = 30;
+  uint16_t walker_y = 100;
+
+
+  kyocera_draw_heart(heart_x, heart_y, animation_state);
+  kyocera_draw_walker(walker_x, walker_y, animation_state);
 
 //  max32664CurrentInitState = MAX32664_INIT_IN_PROGRESS;
 //  //Initiate App mode
