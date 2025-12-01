@@ -19,11 +19,8 @@ extern const sli_bt_gattdb_t gattdb;
 #define gattdb_system_id                      18
 #define gattdb_heart_rate_0                   19
 #define gattdb_heart_rate_measurement         21
-#define gattdb_pulse_oximeter_0               23
-#define gattdb_plx_spot_check_measurement     25
-#define gattdb_plx_continuous_measurement     28
-#define gattdb_StepCounter                    30
-#define gattdb_Steps                          32
+#define gattdb_StepCounter                    23
+#define gattdb_Steps                          25
 
 
 #endif // __GATT_DB_H

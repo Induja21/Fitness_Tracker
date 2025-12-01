@@ -512,9 +512,11 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
                  uint32_t stepcounter = getStepCounterData();
                  currentDataHandlingStateMachineState=BMI270_SEND_INDICATION;
                  snprintf(display_buffer, sizeof(display_buffer), "%d BPM", my_heart_rate[index]);
-                 snprintf(display_buffer, sizeof(display_buffer), "%d Stp", stepcounter);
                  kyocera_draw_string(bpm_text_x, bpm_text_y, display_buffer, &FreeMono12pt7b);
+                 snprintf(display_buffer, sizeof(display_buffer), "%d Stp", stepcounter);
+                 kyocera_draw_string(step_text_x, step_text_y, display_buffer, &FreeMono12pt7b);
                  sendIndicationsOfStepCount(stepcounter);
+                 kyocera_lcd_flush();
 
 
              }

@@ -8,7 +8,7 @@
 
     <!--Device Name-->
     <characteristic const="false" id="device_name" name="Device Name" sourceId="org.bluetooth.characteristic.gap.device_name" uuid="2A00">
-      <value length="12" type="utf-8" variable_length="false">InduLowPower</value>
+      <value length="15" type="utf-8" variable_length="false">LowPowerRangers</value>
       <properties>
         <read authenticated="false" bonded="false" encrypted="false"/>
         <write authenticated="false" bonded="false" encrypted="false"/>
@@ -58,32 +58,6 @@ Summary: The HEART RATE Service exposes heart rate and other data related to a h
       <value length="8" type="hex" variable_length="false"/>
       <properties>
         <indicate authenticated="false" bonded="false" encrypted="false"/>
-      </properties>
-    </characteristic>
-  </service>
-
-  <!--Pulse Oximeter Service-->
-  <service advertise="false" id="pulse_oximeter_0" name="Pulse Oximeter Service" requirement="mandatory" sourceId="org.bluetooth.service.pulse_oximeter" type="primary" uuid="1822">
-    <informativeText>Abstract: This Service specification proposes a pulse oximetry server for use in consumer and professional healthcare applications.
-Summary: The Pulse Oximeter Service exposes pulse oximetry data related to a non-invasive pulse oximetry sensor for consumer and professional healthcare applications.</informativeText>
-
-    <!--PLX Spot-Check Measurement-->
-    <characteristic const="false" id="plx_spot_check_measurement" name="PLX Spot-Check Measurement" sourceId="org.bluetooth.characteristic.plx_spot_check_measurement" uuid="2A5E">
-      <informativeText>
-Summary: The PLX Spot-check Measurement characteristic, if supported, is used to send Spot-check measurements of SpO2 (Percent oxygen saturation of hemoglobin) and PR (pulse rate). This characteristic is a variable length structure containing the Flags field, the SpO2PR-Spot-Check field, and depending on the contents of the Flags field, the Timestamp field, the Measurement Status field, the Device and Sensor Status field, and/or the Pulse Amplitude Index field. </informativeText>
-      <value length="19" type="hex" variable_length="false"/>
-      <properties>
-        <indicate authenticated="false" bonded="false" encrypted="false"/>
-      </properties>
-    </characteristic>
-
-    <!--PLX Continuous Measurement-->
-    <characteristic const="false" id="plx_continuous_measurement" name="PLX Continuous Measurement" sourceId="org.bluetooth.characteristic.plx_continuous_measurement" uuid="2A5F">
-      <informativeText>
-Summary: The PLX Continuous Measurement characteristic, if supported, is used to send periodic pulse oximetry measurements. This characteristic is a variable length structure containing the Flags field (to indicate presence of optional fields), the SpO2PR-Normal field, and depending on the contents of the Flags field, the SpO2PR-Fast field, the SpO2PR-Slow field, the Measurement Status field, the Device and Sensor Status field, and/or the Pulse Amplitude Index field.</informativeText>
-      <value length="20" type="hex" variable_length="false"/>
-      <properties>
-        <notify authenticated="false" bonded="false" encrypted="false"/>
       </properties>
     </characteristic>
   </service>
