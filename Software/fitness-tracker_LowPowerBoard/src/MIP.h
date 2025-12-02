@@ -36,7 +36,7 @@ typedef struct {
 
 // 3. Prototype your drawing functions
 void kyocera_draw_gfx_char(int16_t x, int16_t y, unsigned char c, const GFXfont *font);
-void kyocera_draw_string(int16_t x, int16_t y, const char *str, const GFXfont *font);
+void kyocera_draw_string(int16_t x, int16_t y, const char *str);
 /*
  * Framebuffer: 1 bit per pixel
  * 1 = WHITE, 0 = BLACK   (per Kyocera datasheet)
@@ -60,7 +60,9 @@ void kyocera_lcd_toggle_vcom(void);
 void kyocera_lcd_flush_line(uint16_t y);
 void lcd_deselect(void);
 void kyocera_lcd_write_raw_test(void);
-
+void kyocera_clear_rect(uint16_t x, uint16_t y,
+                        uint16_t w, uint16_t h,
+                        bool white);
 void kyocera_lcd_draw_test_lines(void);
 void kyocera_write_abc_test(void);
 void kyocera_draw_ecg_and_heart(int frame);
@@ -69,5 +71,7 @@ void kyocera_clear_buffer(bool white);
 
 void kyocera_draw_walker(uint16_t x, uint16_t y, bool frame_stride);
 void kyocera_draw_ecg_graph(uint16_t y_baseline);
+void draw_ble_icon_disconnected();
+void draw_ble_icon();
 
 #endif // KYOCERA_LCD_H

@@ -52,6 +52,7 @@
 
 
 
+
 // *************************************************
 // Students: It is OK to modify this file.
 //           Make edits appropriate for each
@@ -217,11 +218,11 @@ SL_WEAK void app_init(void)
   // Walker: Middle Left
   uint16_t walker_x = 30;
   uint16_t walker_y = 100;
-
-
   kyocera_draw_heart(heart_x, heart_y, animation_state);
   kyocera_draw_walker(walker_x, walker_y, animation_state);
   kyocera_lcd_flush();
+
+
 
 //  max32664CurrentInitState = MAX32664_INIT_IN_PROGRESS;
 //  //Initiate App mode

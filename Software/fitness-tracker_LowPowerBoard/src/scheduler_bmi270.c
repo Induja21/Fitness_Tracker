@@ -79,8 +79,15 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
   allEvents_t event = INVALID_EVENT;
    switch (SL_BT_MSG_ID(bleEvent->header)) {
      case sl_bt_evt_connection_opened_id:
+       {
+
+       }
          break;
      case sl_bt_evt_connection_closed_id:
+       {
+
+       }
+
        break;
      case sl_bt_evt_gatt_server_characteristic_status_id:
        {
@@ -320,7 +327,7 @@ void bmi270StateMachine(sl_bt_msg_t *bleEvent)
               default:
                   break;
           }
-          sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+         // sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
       }
 }
 
@@ -511,12 +518,22 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
                  index=(index+1)%6;
                  uint32_t stepcounter = getStepCounterData();
                  currentDataHandlingStateMachineState=BMI270_SEND_INDICATION;
+                 // Clear BPM region
+                 kyocera_clear_rect(bpm_text_x, bpm_text_y - 14,
+                                    80, 20, /*white=*/true);
+
                  snprintf(display_buffer, sizeof(display_buffer), "%d BPM", my_heart_rate[index]);
-                 kyocera_draw_string(bpm_text_x, bpm_text_y, display_buffer, &FreeMono12pt7b);
+                 kyocera_draw_string(bpm_text_x, bpm_text_y, display_buffer);
+
+                 // Clear Step region
+                 kyocera_clear_rect(step_text_x, step_text_y - 14,
+                                    80, 20, /*white=*/true);
+
                  snprintf(display_buffer, sizeof(display_buffer), "%d Stp", stepcounter);
-                 kyocera_draw_string(step_text_x, step_text_y, display_buffer, &FreeMono12pt7b);
-                 sendIndicationsOfStepCount(stepcounter);
+                 kyocera_draw_string(step_text_x, step_text_y, display_buffer);
+
                  kyocera_lcd_flush();
+                 sendIndicationsOfStepCount(stepcounter);
 
 
              }
@@ -536,7 +553,7 @@ void bmi270DataHandlingStateMachine(sl_bt_msg_t *bleEvent)
          case BMI270_SEND_BPM_INDICATION:
            {
              currentDataHandlingStateMachineState=BMI270_WAIT_FOR_INTERRUPT;
-             sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+             //sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM2);
            }
            break;
          default:

@@ -32,6 +32,7 @@
 #include "log.h"
 #include "gpio.h"
 #include "timer.h"
+#include "MIP.h"
 
 
 // Set the advertising interval to 250 ms (min = max = 400 * 0.625 ms = 250 ms)
@@ -204,6 +205,9 @@ void handle_ble_event(sl_bt_msg_t *event) {
 //                LOG_ERROR("Failed to get Bluetooth address, error code: 0x%04x\n", (int)status);
 //            }
             //Start advertising
+
+            kyocera_draw_string(60, 220, "Advertising");
+            kyocera_lcd_flush();
             start_advertising();
            // gpioInit();
 
@@ -212,6 +216,9 @@ void handle_ble_event(sl_bt_msg_t *event) {
 
         case sl_bt_evt_connection_opened_id: {
             connection_established_event(event);
+            kyocera_clear_rect(60, 206,160, 40, /*white=*/true);
+            kyocera_draw_string(60, 220, "Connected");
+            kyocera_lcd_flush();
             break;
         }
 
@@ -228,6 +235,9 @@ void handle_ble_event(sl_bt_msg_t *event) {
                 LOG_ERROR("Failed to restart advertising with error code %d", (int)status);
             }
            // displayPrintf(DISPLAY_ROW_TEMPVALUE,"");
+            kyocera_clear_rect(60, 206,160, 40, /*white=*/true);
+            kyocera_draw_string(60, 220, "Advertising");
+            kyocera_lcd_flush();
             break;
         }
         case sl_bt_evt_connection_parameters_id:

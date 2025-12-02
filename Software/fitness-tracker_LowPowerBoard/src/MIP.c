@@ -297,7 +297,7 @@ void kyocera_draw_gfx_char(int16_t x, int16_t y, unsigned char c, const GFXfont 
 /* ---------------------------------------------------------
  * DRAW STRING HELPER
  * --------------------------------------------------------- */
-void kyocera_draw_string(int16_t x, int16_t y, const char *str, const GFXfont *font)
+void kyocera_draw_string(int16_t x, int16_t y, const char *str)
 {
     int16_t cursor_x = x;
     int16_t cursor_y = y;
@@ -306,10 +306,10 @@ void kyocera_draw_string(int16_t x, int16_t y, const char *str, const GFXfont *f
     while((c = *str++)) {
         if (c == '\n') {
             cursor_x = x;
-            cursor_y += font->yAdvance;
+            cursor_y += FreeMono12pt7b.yAdvance;
         } else {
-            kyocera_draw_gfx_char(cursor_x, cursor_y, c, font);
-            const GFXglyph *glyph = &(font->glyph[c - font->first]);
+            kyocera_draw_gfx_char(cursor_x, cursor_y, c, &FreeMono12pt7b);
+            const GFXglyph *glyph = &(FreeMono12pt7b.glyph[c - FreeMono12pt7b.first]);
             cursor_x += glyph->xAdvance;
         }
     }
@@ -332,6 +332,110 @@ static const uint16_t heart_small[16] = {
     0x0FF0, 0x07E0, 0x03C0, 0x0180,
     0x0000, 0x0000, 0x0000, 0x0000
 };
+static const uint8_t ble_icon_bitmap[12] = {
+  0b00001000,
+  0b00011100,
+  0b00101010,
+  0b01001001,
+  0b01001001,
+  0b00101010,
+  0b00011100,
+  0b00001000,
+  0b00011100,
+  0b00101010,
+  0b01001001,
+  0b10000000
+};
+
+static const uint8_t ble_icon_disconnected[12] = {
+  0b10001000,
+  0b01011100,
+  0b00101010,
+  0b01011001,
+  0b01001001,
+  0b00101110,
+  0b00111110,
+  0b00001001,
+  0b00011110,
+  0b00101100,
+  0b01001001,
+  0b10010000
+};
+
+
+// Clear rectangular area in framebuffer (false = black, true = white)
+void kyocera_clear_rect(uint16_t x, uint16_t y,
+                        uint16_t w, uint16_t h,
+                        bool white)
+{
+    uint8_t fill = white ? 0xFF : 0x00;
+
+    for (uint16_t yy = y; yy < (y + h); yy++)
+    {
+        if (yy >= KYOCERA_LCD_HEIGHT) break;
+
+        for (uint16_t xx = x; xx < (x + w); xx++)
+        {
+            if (xx >= KYOCERA_LCD_WIDTH) break;
+
+            uint8_t bit_mask = 1 << (7 - (xx % 8));
+
+            if (white)
+                kyocera_fb[yy][xx / 8] |= bit_mask;
+            else
+                kyocera_fb[yy][xx / 8] &= ~bit_mask;
+        }
+    }
+}
+#define BLE_ICON_W   12
+#define BLE_ICON_H   12
+uint16_t ble_icon_x = KYOCERA_LCD_WIDTH - BLE_ICON_W - 10;   // 256 - 12 - 10 = 234
+uint16_t ble_icon_y = 10;                                    // top margin
+void draw_ble_icon()
+{
+    for (uint8_t row = 0; row < BLE_ICON_H; row++)
+    {
+        uint8_t bits = ble_icon_bitmap[row];
+
+        for (uint8_t col = 0; col < BLE_ICON_W; col++)
+        {
+            uint8_t pixel = (bits >> col) & 1;
+
+            if (pixel)
+            {
+                kyocera_set_pixel(
+                    ble_icon_x + col,
+                    ble_icon_y + row,
+                    false    // BLACK (same as heart)
+                );
+            }
+        }
+    }
+}
+
+
+void draw_ble_icon_disconnected()
+{
+    for (uint8_t row = 0; row < BLE_ICON_H; row++)
+    {
+        uint8_t bits = ble_icon_disconnected[row];
+
+        for (uint8_t col = 0; col < BLE_ICON_W; col++)
+        {
+            uint8_t pixel = (bits >> col) & 1;
+
+            if (pixel)
+            {
+                kyocera_set_pixel(
+                    ble_icon_x + col,
+                    ble_icon_y + row,
+                    false    // BLACK (same as heart)
+                );
+            }
+        }
+    }
+}
+
 
 /* ---------------------------------------------------------
  * DRAW HEART (SCALED 4X)
